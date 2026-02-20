@@ -166,6 +166,17 @@ fn computer_move(state: &mut GameState, level: u32) {
                 .collect();
             if !blocking.is_empty() {
                 *blocking.choose(&mut rand::thread_rng()).unwrap()
+            } else if level >= 3 {
+                // Send opponent to an empty board (no pieces yet)
+                let to_empty: Vec<_> = moves.iter()
+                    .filter(|&&(_b, c)| state.cells[c].iter().all(|&cell| cell == Cell::Empty))
+                    .copied()
+                    .collect();
+                if !to_empty.is_empty() {
+                    *to_empty.choose(&mut rand::thread_rng()).unwrap()
+                } else {
+                    *moves.choose(&mut rand::thread_rng()).unwrap()
+                }
             } else {
                 *moves.choose(&mut rand::thread_rng()).unwrap()
             }
