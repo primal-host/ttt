@@ -158,6 +158,10 @@ body {
   opacity: 0.3;
 }
 
+.cell.half-dimmed {
+  opacity: 0.5;
+}
+
 .cell.legal {
   cursor: pointer;
 }
