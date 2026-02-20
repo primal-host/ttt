@@ -61,10 +61,6 @@ body {
   object-fit: contain;
 }
 
-#info-ad {
-  width: 300px;
-  height: 250px;
-}
 
 #top-bar {
   display: flex;
