@@ -83,7 +83,7 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
-  gap: 3px;
+  gap: 5px;
   width: 100%;
   aspect-ratio: 1;
   background: transparent;
