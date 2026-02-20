@@ -10,6 +10,8 @@ let gameRecorded = false;
 let currentPlayer = null;
 let stateHistory = [];
 let assisted = false;
+let hintMove = null;
+let hintText = "";
 
 // --- Player storage ---
 // ttt_players = { "name": { level, history, game, recorded } }
@@ -207,6 +209,8 @@ function render() {
 
       if (legal.has(`${b},${c}`)) el.classList.add("legal");
 
+      if (hintMove && hintMove.board === b && hintMove.cell === c) el.classList.add("hint");
+
       if (metaWinLine && !metaWinLine.includes(b)) el.classList.add("dimmed");
       else if (winLine && !winLine.includes(c) && state.cells[b][c] !== "empty") el.classList.add("dimmed");
       else if (winLine && state.cells[b][c] === "empty") el.classList.add("half-dimmed");
@@ -230,6 +234,9 @@ function render() {
   }
   prevBoardWinners = [...state.board_winners];
 
+  const hintTextEl = document.getElementById("hint-text");
+  if (hintTextEl) hintTextEl.textContent = hintText;
+
   const gameOver = state.status === "bluewins" || state.status === "redwins" || state.status === "draw";
   undoBtn.classList.toggle("btn-hidden", gameOver || stateHistory.length === 0);
   hintBtn.classList.toggle("btn-hidden", gameOver);
@@ -250,6 +257,8 @@ async function onCellClick(e) {
   const legal = getLegalMoves(state);
   if (!legal.some(([lb, lc]) => lb === b && lc === c)) return;
 
+  hintMove = null;
+  hintText = "";
   stateHistory.push(JSON.parse(JSON.stringify(state)));
   busy = true;
   try {
@@ -269,16 +278,32 @@ async function onCellClick(e) {
   }
 }
 
-function hint() {
+async function hint() {
+  if (busy || !state || state.status !== "bluetomove") return;
   assisted = true;
   syncFromPlayer();
-  // TODO: show hint
+  busy = true;
+  try {
+    const resp = await fetch("/api/hint", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ state }),
+    });
+    const data = await resp.json();
+    hintMove = { board: data.board_idx, cell: data.cell_idx };
+    hintText = data.explanation;
+    render();
+  } finally {
+    busy = false;
+  }
 }
 
 function undo() {
   if (busy || stateHistory.length === 0) return;
   state = stateHistory.pop();
   assisted = true;
+  hintMove = null;
+  hintText = "";
   prevBoardWinners = null;
   syncFromPlayer();
   render();
@@ -289,6 +314,8 @@ async function newGame() {
   prevBoardWinners = null;
   stateHistory = [];
   assisted = false;
+  hintMove = null;
+  hintText = "";
 
   busy = true;
   try {
@@ -331,6 +358,8 @@ function moreGame() {
   prevBoardWinners = null;
   stateHistory = [];
   assisted = false;
+  hintMove = null;
+  hintText = "";
 
   syncFromPlayer();
   render();
