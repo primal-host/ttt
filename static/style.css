@@ -23,21 +23,13 @@ body {
   max-width: 540px;
 }
 
-h1 {
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: #ccc;
+#top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 40px;
 }
-
-#status {
-  font-size: 1.1rem;
-  height: 1.4em;
-  color: #aaa;
-}
-
-#status.blue { color: #4a9d5b; }
-#status.red { color: #d94a4a; }
-#status.draw { color: #e89830; }
 
 #meta-board {
   display: grid;
@@ -120,20 +112,14 @@ h1 {
   pointer-events: none;
 }
 
-#bottom-bar {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
 #level {
   font-size: 0.9rem;
   color: #666;
 }
 
 #new-game {
-  padding: 10px 28px;
-  font-size: 1rem;
+  padding: 6px 20px;
+  font-size: 0.9rem;
   border: none;
   border-radius: 6px;
   background: #4a9d5b;
@@ -144,4 +130,8 @@ h1 {
 
 #new-game:hover {
   background: #3d8a4d;
+}
+
+#new-game.hidden {
+  visibility: hidden;
 }

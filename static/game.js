@@ -33,7 +33,6 @@ function recordResult(winner) {
 }
 
 const metaBoard = document.getElementById("meta-board");
-const statusEl = document.getElementById("status");
 const newGameBtn = document.getElementById("new-game");
 const levelEl = document.getElementById("level");
 
@@ -130,28 +129,14 @@ function render() {
     }
   }
 
-  // Status text
-  statusEl.className = "";
-  switch (state.status) {
-    case "bluetomove":
-    case "redtomove":
-      statusEl.textContent = "";
-      break;
-    case "bluewins":
-      statusEl.textContent = "You win!";
-      statusEl.classList.add("blue");
-      if (!gameRecorded) { gameRecorded = true; recordResult("blue"); updateLevelDisplay(); }
-      break;
-    case "redwins":
-      statusEl.textContent = "Computer wins!";
-      statusEl.classList.add("red");
-      if (!gameRecorded) { gameRecorded = true; recordResult("red"); updateLevelDisplay(); }
-      break;
-    case "draw":
-      statusEl.textContent = "Draw!";
-      statusEl.classList.add("draw");
-      if (!gameRecorded) { gameRecorded = true; recordResult("draw"); updateLevelDisplay(); }
-      break;
+  // Game over: show new game button
+  const gameOver = state.status === "bluewins" || state.status === "redwins" || state.status === "draw";
+  newGameBtn.classList.toggle("hidden", !gameOver);
+  if (gameOver && !gameRecorded) {
+    gameRecorded = true;
+    const winner = state.status === "bluewins" ? "blue" : state.status === "redwins" ? "red" : "draw";
+    recordResult(winner);
+    updateLevelDisplay();
   }
 }
 
