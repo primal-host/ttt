@@ -154,6 +154,7 @@ body {
 
 .cell.legal:hover {
   border: 1px solid #e89830;
+  opacity: 1;
 }
 
 /* Last-move marker */
