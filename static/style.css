@@ -25,6 +25,10 @@ body {
 
 .hidden { display: none !important; }
 
+#game-view {
+  width: 100%;
+}
+
 #top-bar {
   display: flex;
   align-items: center;
