@@ -85,10 +85,29 @@ const IMAGE_SOURCES = [
   "https://loremflickr.com/300/250",
 ];
 
-function refreshImage() {
+let infoShowAd = false;
+let adInitialized = false;
+
+function refreshInfoBox(forceImage) {
   if (!infoImg) return;
-  const source = IMAGE_SOURCES[Math.floor(Math.random() * IMAGE_SOURCES.length)];
-  infoImg.src = source + "?r=" + Math.random();
+  if (forceImage) infoShowAd = false;
+
+  const ad = document.getElementById("info-ad");
+
+  if (infoShowAd && ad) {
+    infoImg.style.display = "none";
+    ad.style.display = "block";
+    if (!adInitialized) {
+      (window.adsbygoogle = window.adsbygoogle || []).push({});
+      adInitialized = true;
+    }
+  } else {
+    if (ad) ad.style.display = "none";
+    infoImg.style.display = "block";
+    const source = IMAGE_SOURCES[Math.floor(Math.random() * IMAGE_SOURCES.length)];
+    infoImg.src = source + "?r=" + Math.random();
+  }
+  infoShowAd = !infoShowAd;
 }
 const playersList = document.getElementById("players-list");
 const newPlayerBtn = document.getElementById("new-player-btn");
@@ -222,7 +241,7 @@ function render() {
   if (prevBoardWinners) {
     for (let i = 0; i < 9; i++) {
       if (state.board_winners[i] !== "empty" && prevBoardWinners[i] === "empty") {
-        refreshImage();
+        refreshInfoBox(gameWon);
         break;
       }
     }
@@ -268,7 +287,7 @@ async function onCellClick(e) {
 async function newGame() {
   gameRecorded = false;
   prevBoardWinners = null;
-  refreshImage();
+  refreshInfoBox(true);
   busy = true;
   try {
     const resp = await fetch("/api/new", { method: "POST" });
@@ -322,7 +341,7 @@ function selectPlayer(name) {
   saveCurrentPlayerName(name);
   syncToPlayer();
   prevBoardWinners = null;
-  refreshImage();
+  refreshInfoBox(true);
   updatePlayerNameDisplay();
   updateLevelDisplay();
   showGameView();
