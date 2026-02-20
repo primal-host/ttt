@@ -43,12 +43,12 @@ h1 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
-  gap: 6px;
+  gap: 1px;
   width: 100%;
   aspect-ratio: 1;
-  background: #333;
+  background: rgba(232, 152, 48, 0.15);
   border-radius: 8px;
-  padding: 6px;
+  padding: 1px;
 }
 
 .small-board {
