@@ -232,7 +232,7 @@ function render() {
 
   const gameOver = state.status === "bluewins" || state.status === "redwins" || state.status === "draw";
   undoBtn.classList.toggle("btn-hidden", gameOver || stateHistory.length === 0);
-  hintBtn.classList.toggle("btn-hidden", gameOver || state.status !== "bluetomove");
+  hintBtn.classList.toggle("btn-hidden", gameOver);
   continueBtn.classList.toggle("btn-hidden", !gameOver);
   if (gameOver && !gameRecorded) {
     gameRecorded = true;
