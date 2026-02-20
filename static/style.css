@@ -35,7 +35,7 @@ h1 {
   color: #aaa;
 }
 
-#status.blue { color: #4a90d9; }
+#status.blue { color: #4a9d5b; }
 #status.red { color: #d94a4a; }
 #status.draw { color: #e89830; }
 
@@ -46,7 +46,7 @@ h1 {
   gap: 1px;
   width: 100%;
   aspect-ratio: 1;
-  background: rgba(232, 152, 48, 0.07);
+  background: rgba(74, 144, 217, 0.10);
   border-radius: 8px;
   padding: 1px;
 }
@@ -68,7 +68,7 @@ h1 {
 }
 
 .small-board.won-blue {
-  background: rgba(74, 144, 217, 0.35);
+  background: rgba(74, 157, 91, 0.35);
 }
 
 .small-board.won-red {
@@ -89,7 +89,7 @@ h1 {
 }
 
 .cell.blue {
-  background: #4a90d9;
+  background: #4a9d5b;
   border-radius: 8px;
 }
 
@@ -134,12 +134,12 @@ h1 {
   font-size: 1rem;
   border: none;
   border-radius: 6px;
-  background: #4a90d9;
+  background: #4a9d5b;
   color: white;
   cursor: pointer;
   transition: background 0.15s;
 }
 
 #new-game:hover {
-  background: #3a7bc8;
+  background: #3d8a4d;
 }
