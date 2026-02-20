@@ -306,17 +306,16 @@ async function newGame() {
 function moreGame() {
   if (!state) return;
 
-  const metaWinLine = findWinLine(state.board_winners);
+  // Clear boards with any 3-in-a-row
   const clearSet = new Set();
-
-  // Winning boards
-  if (metaWinLine) for (const b of metaWinLine) clearSet.add(b);
-  // Full boards and boards with any 3-in-a-row
   for (let b = 0; b < 9; b++) {
-    if (state.board_full[b] || findWinLine(state.cells[b])) clearSet.add(b);
+    if (findWinLine(state.cells[b])) clearSet.add(b);
   }
-  // Center board
-  clearSet.add(4);
+
+  // If all boards are dead, clear all of them
+  if (clearSet.size === 0) {
+    for (let b = 0; b < 9; b++) clearSet.add(b);
+  }
 
   for (const b of clearSet) {
     state.cells[b] = ["empty","empty","empty","empty","empty","empty","empty","empty","empty"];
@@ -325,7 +324,7 @@ function moreGame() {
   }
 
   state.status = "bluetomove";
-  state.required_board = 4;
+  state.required_board = null;
   state.last_blue = null;
   state.last_red = null;
 
