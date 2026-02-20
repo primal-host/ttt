@@ -174,7 +174,7 @@ body {
   margin: 0 5px;
 }
 
-#undo, #continue-btn {
+#undo, #continue-btn, #hint {
   width: calc((100% - 10px) / 3);
   padding: 6px 0;
   font-size: 0.9rem;
@@ -186,12 +186,16 @@ body {
   transition: background 0.15s;
 }
 
-#undo:hover, #continue-btn:hover {
+#undo:hover, #continue-btn:hover, #hint:hover {
   background: #3d8a4d;
 }
 
 #continue-btn {
   margin: 0 auto;
+}
+
+#hint {
+  margin-left: auto;
 }
 
 .btn-hidden {
