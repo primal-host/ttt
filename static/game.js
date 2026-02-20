@@ -155,6 +155,14 @@ function findWinLine(boardCells) {
   return null;
 }
 
+function isBoardDead(boardCells) {
+  return WIN_LINES.every(line => {
+    const hasBlue = line.some(i => boardCells[i] === "blue");
+    const hasRed = line.some(i => boardCells[i] === "red");
+    return hasBlue && hasRed;
+  });
+}
+
 function render() {
   if (!state) return;
 
@@ -169,7 +177,7 @@ function render() {
     boardEl.className = "small-board";
 
     const winLine = (state.board_winners[b] !== "empty") ? findWinLine(state.cells[b]) : null;
-    const winClass = state.board_winners[b] === "blue" ? "win-blue" : state.board_winners[b] === "red" ? "win-red" : null;
+    const dead = (state.board_winners[b] === "empty") && isBoardDead(state.cells[b]);
 
     if (isBluesTurn && state.required_board !== null && state.required_board !== undefined && state.required_board === b) {
       boardEl.classList.add("active");
@@ -187,6 +195,7 @@ function render() {
       if (legal.has(`${b},${c}`)) el.classList.add("legal");
 
       if (winLine && !winLine.includes(c)) el.classList.add("dimmed");
+      if (dead && state.cells[b][c] !== "empty") el.classList.add("dimmed");
 
       if (state.last_blue && state.last_blue[0] === b && state.last_blue[1] === c) el.classList.add("last-move");
       if (state.last_red && state.last_red[0] === b && state.last_red[1] === c) el.classList.add("last-move");
