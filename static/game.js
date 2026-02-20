@@ -154,7 +154,11 @@ async function onCellClick(e) {
   }
 }
 
-async function newGame() {
+function newGame() {
+  window.location = "/?v=" + Math.floor(Date.now() / 1000);
+}
+
+async function initGame() {
   busy = true;
   try {
     const resp = await fetch("/api/new", { method: "POST" });
@@ -167,4 +171,4 @@ async function newGame() {
 
 newGameBtn.addEventListener("click", newGame);
 buildBoard();
-newGame();
+initGame();

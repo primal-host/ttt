@@ -1,6 +1,14 @@
-use axum::{extract::Json, http::StatusCode, response::IntoResponse, routing::post, Router};
+use axum::{
+    extract::{Json, Query},
+    http::{header, StatusCode},
+    response::{Html, IntoResponse, Redirect},
+    routing::{get, post},
+    Router,
+};
 use rand::seq::SliceRandom;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::time::{SystemTime, UNIX_EPOCH};
 use tower_http::services::ServeDir;
 
 const WIN_LINES: [[usize; 3]; 8] = [
@@ -154,6 +162,26 @@ struct MoveResponse {
     error: Option<String>,
 }
 
+fn now_secs() -> u64 {
+    SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs()
+}
+
+async fn handle_index(Query(params): Query<HashMap<String, String>>) -> impl IntoResponse {
+    match params.get("v") {
+        Some(v) if v.parse::<u64>().is_ok() => {
+            let html = include_str!("../static/index.html").replace("{{VERSION}}", v);
+            (
+                [(header::CACHE_CONTROL, "no-store")],
+                Html(html),
+            ).into_response()
+        }
+        _ => {
+            let url = format!("/?v={}", now_secs());
+            Redirect::to(&url).into_response()
+        }
+    }
+}
+
 async fn handle_new() -> Json<GameState> {
     Json(GameState::new())
 }
@@ -216,6 +244,7 @@ async fn handle_move(Json(req): Json<MoveRequest>) -> impl IntoResponse {
 #[tokio::main]
 async fn main() {
     let app = Router::new()
+        .route("/", get(handle_index))
         .route("/api/new", post(handle_new))
         .route("/api/move", post(handle_move))
         .fallback_service(ServeDir::new("static"));
