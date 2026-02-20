@@ -79,6 +79,14 @@ fn is_board_full(cells: &[Cell; 9]) -> bool {
     cells.iter().all(|c| *c != Cell::Empty)
 }
 
+fn is_meta_dead(board_winners: &[Cell; 9]) -> bool {
+    WIN_LINES.iter().all(|line| {
+        let has_blue = line.iter().any(|&i| board_winners[i] == Cell::Blue);
+        let has_red = line.iter().any(|&i| board_winners[i] == Cell::Red);
+        has_blue && has_red
+    })
+}
+
 fn apply_move(state: &mut GameState, board_idx: usize, cell_idx: usize, player: Cell) {
     state.cells[board_idx][cell_idx] = player;
 
@@ -111,7 +119,8 @@ fn apply_move(state: &mut GameState, board_idx: usize, cell_idx: usize, player: 
         state.status = GameStatus::BlueWins;
     } else if meta_winner == Cell::Red {
         state.status = GameStatus::RedWins;
-    } else if state.board_winners.iter().zip(state.board_full.iter()).all(|(w, f)| *w != Cell::Empty || *f) {
+    } else if is_meta_dead(&state.board_winners)
+        || state.board_winners.iter().zip(state.board_full.iter()).all(|(w, f)| *w != Cell::Empty || *f) {
         state.status = GameStatus::Draw;
     } else {
         state.status = match player {
