@@ -2,6 +2,7 @@ FROM infra-eridu:latest AS builder
 WORKDIR /build
 COPY Cargo.toml ./
 COPY src/ ./src/
+COPY static/ ./static/
 RUN cargo build --release
 
 FROM ubuntu:24.04
