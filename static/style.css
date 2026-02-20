@@ -43,12 +43,10 @@ h1 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
-  gap: 6px;
+  gap: 0;
   width: 100%;
   aspect-ratio: 1;
-  background: #333;
-  border-radius: 8px;
-  padding: 6px;
+  background: transparent;
 }
 
 .small-board {
@@ -57,10 +55,19 @@ h1 {
   grid-template-rows: repeat(3, 1fr);
   gap: 2px;
   background: #2a2a3e;
-  border-radius: 4px;
   padding: 2px;
   position: relative;
   transition: box-shadow 0.15s;
+  border-right: 1px solid #333;
+  border-bottom: 1px solid #333;
+}
+
+.small-board:nth-child(3n) {
+  border-right: none;
+}
+
+.small-board:nth-child(n+7) {
+  border-bottom: none;
 }
 
 .small-board.active {
