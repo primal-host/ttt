@@ -307,7 +307,7 @@ function moreGame() {
   if (!state) return;
 
   for (let b = 0; b < 9; b++) {
-    if (state.board_winners[b] !== "empty") {
+    if (state.board_winners[b] !== "empty" || isBoardDead(state.cells[b])) {
       state.cells[b] = ["empty","empty","empty","empty","empty","empty","empty","empty","empty"];
       state.board_winners[b] = "empty";
       state.board_full[b] = false;
