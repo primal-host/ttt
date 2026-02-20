@@ -39,6 +39,7 @@ body {
   margin-top: 10px;
   display: flex;
   justify-content: flex-start;
+  padding: 0 1px;
 }
 
 
@@ -174,7 +175,8 @@ body {
 }
 
 #undo, #continue-btn {
-  padding: 6px 20px;
+  width: calc((100% - 10px) / 3);
+  padding: 6px 0;
   font-size: 0.9rem;
   border: none;
   border-radius: 6px;
