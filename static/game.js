@@ -6,10 +6,40 @@ const WIN_LINES = [
 
 let state = null;
 let busy = false;
+let gameRecorded = false;
+
+// Persistent difficulty state
+let level = parseInt(localStorage.getItem("ttt_level") || "0");
+let history = JSON.parse(localStorage.getItem("ttt_history") || "[]");
+if (level < 0) level = 0;
+
+function saveProgress() {
+  localStorage.setItem("ttt_level", level);
+  localStorage.setItem("ttt_history", JSON.stringify(history));
+}
+
+function recordResult(winner) {
+  history.push(winner);
+  if (history.length > 3) history = history.slice(-3);
+
+  if (history.length === 3 && history.every(r => r === "blue")) {
+    level++;
+    history = [];
+  } else if (history.length === 3 && history.every(r => r === "red")) {
+    if (level > 0) level--;
+    history = [];
+  }
+  saveProgress();
+}
 
 const metaBoard = document.getElementById("meta-board");
 const statusEl = document.getElementById("status");
 const newGameBtn = document.getElementById("new-game");
+const levelEl = document.getElementById("level");
+
+function updateLevelDisplay() {
+  if (levelEl) levelEl.textContent = "Level " + level;
+}
 
 // Build DOM once
 const cells = []; // cells[board][cell] = element
@@ -110,14 +140,17 @@ function render() {
     case "bluewins":
       statusEl.textContent = "You win!";
       statusEl.classList.add("blue");
+      if (!gameRecorded) { gameRecorded = true; recordResult("blue"); updateLevelDisplay(); }
       break;
     case "redwins":
       statusEl.textContent = "Computer wins!";
       statusEl.classList.add("red");
+      if (!gameRecorded) { gameRecorded = true; recordResult("red"); updateLevelDisplay(); }
       break;
     case "draw":
       statusEl.textContent = "Draw!";
       statusEl.classList.add("draw");
+      if (!gameRecorded) { gameRecorded = true; recordResult("draw"); updateLevelDisplay(); }
       break;
   }
 }
@@ -136,7 +169,7 @@ async function onCellClick(e) {
     const resp = await fetch("/api/move", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ state, board_idx: b, cell_idx: c }),
+      body: JSON.stringify({ state, board_idx: b, cell_idx: c, level }),
     });
     const data = await resp.json();
     if (data.ok) {
@@ -157,6 +190,7 @@ async function initGame() {
   try {
     const resp = await fetch("/api/new", { method: "POST" });
     state = await resp.json();
+    updateLevelDisplay();
     render();
   } finally {
     busy = false;

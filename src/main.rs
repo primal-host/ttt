@@ -138,13 +138,34 @@ fn legal_moves(state: &GameState) -> Vec<(usize, usize)> {
     moves
 }
 
-fn computer_move(state: &mut GameState) {
+fn would_win_board(cells: &[Cell; 9], cell_idx: usize, player: Cell) -> bool {
+    let mut test = *cells;
+    test[cell_idx] = player;
+    check_winner(&test) == player
+}
+
+fn computer_move(state: &mut GameState, level: u32) {
     let moves = legal_moves(state);
     if moves.is_empty() {
         return;
     }
-    let &(b, c) = moves.choose(&mut rand::thread_rng()).unwrap();
-    apply_move(state, b, c, Cell::Red);
+
+    let chosen = if level >= 1 {
+        // Play a move that wins a small board if available
+        let winning: Vec<_> = moves.iter()
+            .filter(|&&(b, c)| would_win_board(&state.cells[b], c, Cell::Red))
+            .copied()
+            .collect();
+        if !winning.is_empty() {
+            *winning.choose(&mut rand::thread_rng()).unwrap()
+        } else {
+            *moves.choose(&mut rand::thread_rng()).unwrap()
+        }
+    } else {
+        *moves.choose(&mut rand::thread_rng()).unwrap()
+    };
+
+    apply_move(state, chosen.0, chosen.1, Cell::Red);
 }
 
 #[derive(Deserialize)]
@@ -152,6 +173,8 @@ struct MoveRequest {
     state: GameState,
     board_idx: usize,
     cell_idx: usize,
+    #[serde(default)]
+    level: u32,
 }
 
 #[derive(Serialize)]
@@ -228,7 +251,7 @@ async fn handle_move(Json(req): Json<MoveRequest>) -> impl IntoResponse {
 
     // If game isn't over, computer plays
     if state.status == GameStatus::RedToMove {
-        computer_move(&mut state);
+        computer_move(&mut state, req.level);
     }
 
     (
