@@ -82,6 +82,7 @@ const playersView = document.getElementById("players-view");
 const metaBoard = document.getElementById("meta-board");
 const undoBtn = document.getElementById("undo");
 const continueBtn = document.getElementById("continue-btn");
+const hintBtn = document.getElementById("hint");
 const levelEl = document.getElementById("level");
 const playerNameEl = document.getElementById("player-name");
 
@@ -231,6 +232,7 @@ function render() {
 
   const gameOver = state.status === "bluewins" || state.status === "redwins" || state.status === "draw";
   undoBtn.classList.toggle("btn-hidden", gameOver || stateHistory.length === 0);
+  hintBtn.classList.toggle("btn-hidden", gameOver || state.status !== "bluetomove");
   continueBtn.classList.toggle("btn-hidden", !gameOver);
   if (gameOver && !gameRecorded) {
     gameRecorded = true;
