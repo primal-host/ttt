@@ -54,7 +54,7 @@ function syncToPlayer() {
   state = data.game;
   gameRecorded = data.recorded || false;
   undoUsed = data.undoUsed || false;
-  stateHistory = [];
+  stateHistory = data.stateHistory || [];
 }
 
 function syncFromPlayer() {
@@ -65,6 +65,7 @@ function syncFromPlayer() {
     game: state,
     recorded: gameRecorded,
     undoUsed,
+    stateHistory,
   });
 }
 
