@@ -101,11 +101,13 @@ body {
   padding: 2px;
   position: relative;
   transition: box-shadow 0.15s;
-  box-shadow: 0 0 0 1px #333, 0 0 0 2px #333;
+  border: 1px solid #333;
+  outline: 1px solid #333;
 }
 
 .small-board.active {
-  box-shadow: 0 0 0 2px transparent, 0 0 0 3px #e89830;
+  border: 1px solid transparent;
+  outline: 1px solid #e89830;
 }
 
 /* Win-line markers */
