@@ -182,7 +182,9 @@ function render() {
     const winLine = (state.board_winners[b] !== "empty") ? findWinLine(state.cells[b]) : null;
     const dead = (state.board_winners[b] === "empty") && isBoardDead(state.cells[b]);
 
-    if (isBluesTurn && state.required_board !== null && state.required_board !== undefined && state.required_board === b) {
+    if (metaWinLine && metaWinLine.includes(b)) {
+      boardEl.classList.add("meta-winner");
+    } else if (isBluesTurn && state.required_board !== null && state.required_board !== undefined && state.required_board === b) {
       boardEl.classList.add("active");
     } else if (isBluesTurn && (state.required_board === null || state.required_board === undefined) && !state.board_full[b]) {
       boardEl.classList.add("active");

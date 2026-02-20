@@ -111,6 +111,11 @@ body {
   outline: 1px solid #e89830;
 }
 
+.small-board.meta-winner {
+  border: 1px solid #888;
+  outline: 1px solid #888;
+}
+
 /* Win-line markers */
 .cell.draw-marker::before {
   content: "";
