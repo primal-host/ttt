@@ -85,6 +85,16 @@ function getLegalMoves(st) {
   return moves;
 }
 
+function findWinLine(boardCells) {
+  for (const line of WIN_LINES) {
+    const a = boardCells[line[0]];
+    if (a !== "empty" && a === boardCells[line[1]] && a === boardCells[line[2]]) {
+      return line;
+    }
+  }
+  return null;
+}
+
 function render() {
   if (!state) return;
 
@@ -99,8 +109,10 @@ function render() {
 
     // Board-level classes
     boardEl.className = "small-board";
-    if (state.board_winners[b] === "blue") boardEl.classList.add("won-blue");
-    else if (state.board_winners[b] === "red") boardEl.classList.add("won-red");
+
+    // Find winning line for this board
+    const winLine = (state.board_winners[b] !== "empty") ? findWinLine(state.cells[b]) : null;
+    const winClass = state.board_winners[b] === "blue" ? "win-blue" : state.board_winners[b] === "red" ? "win-red" : null;
 
     // Active board highlight
     if (isBluesTurn && state.required_board !== null && state.required_board !== undefined && state.required_board === b) {
@@ -118,6 +130,11 @@ function render() {
       else if (state.cells[b][c] === "red") el.classList.add("red");
 
       if (legal.has(`${b},${c}`)) el.classList.add("legal");
+
+      // Win-line markers
+      if (winLine && winClass && winLine.includes(c)) {
+        el.classList.add(winClass);
+      }
 
       // Last-move markers for both players
       if (state.last_blue && state.last_blue[0] === b && state.last_blue[1] === c) {

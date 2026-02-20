@@ -59,17 +59,33 @@ body {
   box-shadow: 0 0 0 2px #e89830;
 }
 
-.small-board.won-blue {
-  background: rgba(74, 157, 91, 0.35);
+/* Win-line markers */
+.cell.win-blue::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40%;
+  height: 40%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: #4a9d5b;
+  pointer-events: none;
+  z-index: 1;
 }
 
-.small-board.won-red {
-  background: rgba(217, 74, 74, 0.35);
-}
-
-.small-board.won-blue .cell,
-.small-board.won-red .cell {
-  opacity: 0.3;
+.cell.win-red::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40%;
+  height: 40%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: #d94a4a;
+  pointer-events: none;
+  z-index: 1;
 }
 
 .cell {
