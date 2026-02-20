@@ -247,6 +247,23 @@ fn best_move_two_ply(state: &GameState, moves: &[(usize, usize)]) -> (usize, usi
     *best_moves.choose(&mut rand::thread_rng()).unwrap()
 }
 
+fn best_move_one_ply(state: &GameState, moves: &[(usize, usize)]) -> (usize, usize) {
+    let mut best_score = i32::MIN;
+    let mut best_moves = Vec::new();
+    for &(b, c) in moves {
+        let mut s = state.clone();
+        apply_move(&mut s, b, c, Cell::Red);
+        let score = evaluate(&s);
+        if score > best_score {
+            best_score = score;
+            best_moves = vec![(b, c)];
+        } else if score == best_score {
+            best_moves.push((b, c));
+        }
+    }
+    *best_moves.choose(&mut rand::thread_rng()).unwrap()
+}
+
 fn prefer_center(moves: &[(usize, usize)]) -> Option<(usize, usize)> {
     let center_cell: Vec<_> = moves.iter().filter(|&&(_, c)| c == 4).copied().collect();
     if !center_cell.is_empty() {
@@ -259,6 +276,23 @@ fn prefer_center(moves: &[(usize, usize)]) -> Option<(usize, usize)> {
     let center_board: Vec<_> = moves.iter().filter(|&&(b, _)| b == 4).copied().collect();
     if !center_board.is_empty() {
         return Some(*center_board.choose(&mut rand::thread_rng()).unwrap());
+    }
+    None
+}
+
+fn prefer_corners(moves: &[(usize, usize)]) -> Option<(usize, usize)> {
+    let corners = [0, 2, 6, 8];
+    let corner_cell: Vec<_> = moves.iter().filter(|&&(_, c)| corners.contains(&c)).copied().collect();
+    if !corner_cell.is_empty() {
+        let corner_both: Vec<_> = corner_cell.iter().filter(|&&(b, _)| corners.contains(&b)).copied().collect();
+        if !corner_both.is_empty() {
+            return Some(*corner_both.choose(&mut rand::thread_rng()).unwrap());
+        }
+        return Some(*corner_cell.choose(&mut rand::thread_rng()).unwrap());
+    }
+    let corner_board: Vec<_> = moves.iter().filter(|&&(b, _)| corners.contains(&b)).copied().collect();
+    if !corner_board.is_empty() {
+        return Some(*corner_board.choose(&mut rand::thread_rng()).unwrap());
     }
     None
 }
@@ -282,9 +316,14 @@ fn pick_move(state: &GameState, level: u32, moves: &[(usize, usize)]) -> (usize,
         return pick_random(moves);
     }
 
-    // Level 14+: two-ply minimax lookahead
-    if level >= 14 {
+    // Level 21+: two-ply minimax lookahead
+    if level >= 21 {
         return best_move_two_ply(state, moves);
+    }
+
+    // Level 20+: one-ply evaluation
+    if level >= 20 {
+        return best_move_one_ply(state, moves);
     }
 
     // Level 2+: win a small board if possible (skip already-won boards)
@@ -295,15 +334,26 @@ fn pick_move(state: &GameState, level: u32, moves: &[(usize, usize)]) -> (usize,
         })
         .copied().collect();
     if !winning.is_empty() {
-        // Level 8+: prefer moves that win the meta-game
-        if level >= 8 {
+        // Level 12+: prefer moves that win the meta-game
+        if level >= 12 {
             let meta_win: Vec<_> = winning.iter()
                 .filter(|&&(b, _)| would_win_meta(&state.board_winners, b, Cell::Red))
                 .copied().collect();
             if !meta_win.is_empty() { return pick_random(&meta_win); }
         }
-        // Level 11+: prefer moves that create meta-board threats
+        // Level 11+: prefer winning boards where opponent also threatens to win
         if level >= 11 {
+            let defensive: Vec<_> = winning.iter()
+                .filter(|&&(b, _)| {
+                    state.cells[b].iter().enumerate().any(|(i, &cell)| {
+                        cell == Cell::Empty && would_win_board(&state.cells[b], i, Cell::Blue)
+                    })
+                })
+                .copied().collect();
+            if !defensive.is_empty() { return pick_random(&defensive); }
+        }
+        // Level 16+: prefer moves that create meta-board threats
+        if level >= 16 {
             let meta_threat: Vec<_> = winning.iter()
                 .filter(|&&(b, _)| creates_meta_threat(&state.board_winners, b, Cell::Red))
                 .copied().collect();
@@ -321,8 +371,8 @@ fn pick_move(state: &GameState, level: u32, moves: &[(usize, usize)]) -> (usize,
             })
             .copied().collect();
         if !blocking.is_empty() {
-            // Level 9+: prioritize blocking meta-game-winning moves
-            if level >= 9 {
+            // Level 13+: prioritize blocking meta-game-winning moves
+            if level >= 13 {
                 let meta_block: Vec<_> = blocking.iter()
                     .filter(|&&(b, _)| would_win_meta(&state.board_winners, b, Cell::Blue))
                     .copied().collect();
@@ -332,8 +382,19 @@ fn pick_move(state: &GameState, level: u32, moves: &[(usize, usize)]) -> (usize,
         }
     }
 
-    // Level 13+: create forks (two simultaneous winning threats)
-    if level >= 13 {
+    // Level 4+: block opponent forks (cells where opponent could create two winning threats)
+    if level >= 4 {
+        let block_forks: Vec<_> = moves.iter()
+            .filter(|&&(b, c)| {
+                state.board_winners[b] == Cell::Empty
+                    && creates_fork(&state.cells[b], c, Cell::Blue)
+            })
+            .copied().collect();
+        if !block_forks.is_empty() { return pick_random(&block_forks); }
+    }
+
+    // Level 19+: create forks (two simultaneous winning threats)
+    if level >= 19 {
         let forks: Vec<_> = moves.iter()
             .filter(|&&(b, c)| {
                 state.board_winners[b] == Cell::Empty
@@ -346,8 +407,24 @@ fn pick_move(state: &GameState, level: u32, moves: &[(usize, usize)]) -> (usize,
     // Build candidate pool with destination filters
     let mut candidates = moves.to_vec();
 
-    // Level 6+: avoid sending opponent where they can win a board in one move
-    if level >= 6 {
+    // Level 7+: avoid sending opponent to boards where they outnumber us
+    if level >= 7 {
+        let safer: Vec<_> = candidates.iter()
+            .filter(|&&(_, c)| {
+                state.board_full[c]
+                    || state.board_winners[c] != Cell::Empty
+                    || {
+                        let blue = state.cells[c].iter().filter(|&&cell| cell == Cell::Blue).count();
+                        let red = state.cells[c].iter().filter(|&&cell| cell == Cell::Red).count();
+                        blue <= red
+                    }
+            })
+            .copied().collect();
+        if !safer.is_empty() { candidates = safer; }
+    }
+
+    // Level 8+: avoid sending opponent where they can win a board in one move
+    if level >= 8 {
         let safe: Vec<_> = candidates.iter()
             .filter(|&&(_, c)| {
                 state.board_full[c]
@@ -360,8 +437,38 @@ fn pick_move(state: &GameState, level: u32, moves: &[(usize, usize)]) -> (usize,
         if !safe.is_empty() { candidates = safe; }
     }
 
-    // Level 12+: avoid sending opponent to boards that advance their meta-strategy
-    if level >= 12 {
+    // Level 9+: avoid sending opponent where they can create a fork
+    if level >= 9 {
+        let safe_fork: Vec<_> = candidates.iter()
+            .filter(|&&(_, c)| {
+                state.board_full[c]
+                    || state.board_winners[c] != Cell::Empty
+                    || !state.cells[c].iter().enumerate().any(|(i, &cell)| {
+                        cell == Cell::Empty && creates_fork(&state.cells[c], i, Cell::Blue)
+                    })
+            })
+            .copied().collect();
+        if !safe_fork.is_empty() { candidates = safe_fork; }
+    }
+
+    // Level 17+: avoid sending opponent to boards where they can block our meta-threats
+    if level >= 17 {
+        let protect: Vec<_> = candidates.iter()
+            .filter(|&&(_, c)| {
+                state.board_full[c]
+                    || state.board_winners[c] != Cell::Empty
+                    || !WIN_LINES.iter().any(|line| {
+                        line.contains(&c)
+                            && state.board_winners[c] == Cell::Empty
+                            && line.iter().filter(|&&i| state.board_winners[i] == Cell::Red).count() == 2
+                    })
+            })
+            .copied().collect();
+        if !protect.is_empty() { candidates = protect; }
+    }
+
+    // Level 18+: avoid sending opponent to boards that advance their meta-strategy
+    if level >= 18 {
         let safe_meta: Vec<_> = candidates.iter()
             .filter(|&&(_, c)| {
                 state.board_full[c]
@@ -373,8 +480,8 @@ fn pick_move(state: &GameState, level: u32, moves: &[(usize, usize)]) -> (usize,
         if !safe_meta.is_empty() { candidates = safe_meta; }
     }
 
-    // Level 7+: trap opponent (send to board with 1 empty cell leading to our advantage)
-    if level >= 7 {
+    // Level 10+: trap opponent (send to board with 1 empty cell leading to our advantage)
+    if level >= 10 {
         let trap: Vec<_> = candidates.iter()
             .filter(|&&(_, c)| {
                 if state.board_full[c] { return false; }
@@ -393,23 +500,26 @@ fn pick_move(state: &GameState, level: u32, moves: &[(usize, usize)]) -> (usize,
         if !trap.is_empty() { return pick_random(&trap); }
     }
 
-    // Level 4+: prefer sending to an empty board
-    if level >= 4 {
+    // Level 5+: prefer sending to an empty board
+    if level >= 5 {
         let to_empty: Vec<_> = candidates.iter()
             .filter(|&&(_, c)| {
                 !state.board_full[c] && state.cells[c].iter().all(|&cell| cell == Cell::Empty)
             })
             .copied().collect();
         if !to_empty.is_empty() {
-            if level >= 10 {
+            if level >= 14 {
                 if let Some(m) = prefer_center(&to_empty) { return m; }
+            }
+            if level >= 15 {
+                if let Some(m) = prefer_corners(&to_empty) { return m; }
             }
             return pick_random(&to_empty);
         }
     }
 
-    // Level 5+: send to the board with the most empty cells
-    if level >= 5 {
+    // Level 6+: send to the board with the most empty cells
+    if level >= 6 {
         let empty_count = |c: usize| {
             if state.board_full[c] { 0 }
             else { state.cells[c].iter().filter(|&&cell| cell == Cell::Empty).count() }
@@ -418,15 +528,21 @@ fn pick_move(state: &GameState, level: u32, moves: &[(usize, usize)]) -> (usize,
         let most_empty: Vec<_> = candidates.iter()
             .filter(|&&(_, c)| empty_count(c) == max_empty)
             .copied().collect();
-        if level >= 10 {
+        if level >= 14 {
             if let Some(m) = prefer_center(&most_empty) { return m; }
+        }
+        if level >= 15 {
+            if let Some(m) = prefer_corners(&most_empty) { return m; }
         }
         return pick_random(&most_empty);
     }
 
-    // Level 10+: prefer center positions as final tiebreaker
-    if level >= 10 {
+    // Level 14+: prefer center positions as final tiebreaker
+    if level >= 14 {
         if let Some(m) = prefer_center(&candidates) { return m; }
+    }
+    if level >= 15 {
+        if let Some(m) = prefer_corners(&candidates) { return m; }
     }
 
     pick_random(&candidates)

@@ -64,7 +64,7 @@ function syncFromPlayer() {
 }
 
 // --- Game state ---
-const MAX_LEVEL = 14;
+const MAX_LEVEL = 21;
 let level = 0;
 let history = [];
 
