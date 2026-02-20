@@ -145,6 +145,12 @@ body {
   opacity: 1;
 }
 
+.cell.hint {
+  outline: 2px solid #4a9d5b;
+  outline-offset: -2px;
+  z-index: 1;
+}
+
 /* Last-move marker */
 .cell.last-move::after {
   content: "";
@@ -282,4 +288,12 @@ body {
   color: #666;
   font-size: 1rem;
   padding-left: 12px;
+}
+
+#hint-text {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #4a9d5b;
+  margin-top: 8px;
+  min-height: 1.2em;
 }
