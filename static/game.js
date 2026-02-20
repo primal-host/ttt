@@ -190,6 +190,8 @@ function render() {
 
       if (state.last_blue && state.last_blue[0] === b && state.last_blue[1] === c) el.classList.add("last-move");
       if (state.last_red && state.last_red[0] === b && state.last_red[1] === c) el.classList.add("last-move");
+
+      if (state.status === "draw" && state.cells[b][c] === "empty") el.classList.add("draw-marker");
     }
   }
 
