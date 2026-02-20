@@ -228,6 +228,7 @@ function render() {
 
       if (metaWinLine && !metaWinLine.includes(b)) el.classList.add("dimmed");
       else if (winLine && !winLine.includes(c) && state.cells[b][c] !== "empty") el.classList.add("dimmed");
+      else if (winLine && state.cells[b][c] === "empty") el.classList.add("half-dimmed");
       if (dead && state.cells[b][c] !== "empty") el.classList.add("dimmed");
 
       if (state.last_blue && state.last_blue[0] === b && state.last_blue[1] === c) el.classList.add("last-move");
