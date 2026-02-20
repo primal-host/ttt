@@ -60,20 +60,7 @@ body {
 }
 
 /* Win-line markers */
-.cell.win-blue::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 40%;
-  height: 40%;
-  transform: translate(-50%, -50%);
-  border-radius: 50%;
-  background: #4a9d5b;
-  pointer-events: none;
-  z-index: 1;
-}
-
+.cell.win-blue::before,
 .cell.win-red::before {
   content: "";
   position: absolute;
@@ -83,7 +70,7 @@ body {
   height: 40%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: #d94a4a;
+  background: white;
   pointer-events: none;
   z-index: 1;
 }
