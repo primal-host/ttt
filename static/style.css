@@ -46,7 +46,7 @@ h1 {
   gap: 1px;
   width: 100%;
   aspect-ratio: 1;
-  background: rgba(232, 152, 48, 0.15);
+  background: rgba(232, 152, 48, 0.07);
   border-radius: 8px;
   padding: 1px;
 }
