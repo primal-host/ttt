@@ -112,7 +112,7 @@ body {
 }
 
 .small-board.won {
-  background: #333;
+  background: #888;
 }
 
 .small-board.active {
