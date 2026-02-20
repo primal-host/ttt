@@ -43,10 +43,10 @@ body {
 
 #info-box {
   width: 320px;
-  height: 260px;
+  height: 270px;
   border: 1px solid #333;
   border-radius: 12px;
-  padding: 5px;
+  padding: 10px;
 }
 
 #top-bar {
