@@ -111,10 +111,6 @@ body {
   outline: 1px solid #333;
 }
 
-.small-board.won {
-  background: #666;
-}
-
 .small-board.active {
   border: 1px solid transparent;
   outline: 1px solid #e89830;
