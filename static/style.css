@@ -23,12 +23,24 @@ body {
   max-width: 540px;
 }
 
+.hidden { display: none !important; }
+
 #top-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   width: 100%;
   height: 40px;
+}
+
+#player-name {
+  font-size: 0.9rem;
+  color: #4a9d5b;
+  cursor: pointer;
+}
+
+#player-name:hover {
+  text-decoration: underline;
 }
 
 #meta-board {
@@ -135,6 +147,69 @@ body {
   background: #3d8a4d;
 }
 
-#new-game.hidden {
+#new-game.btn-hidden {
   visibility: hidden;
+}
+
+/* Players view */
+#players-view {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding-top: 40px;
+}
+
+#players-header {
+  font-size: 1.2rem;
+  color: #888;
+}
+
+#players-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.player-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #1a1a1a;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.player-row:hover {
+  background: #2a2a2a;
+}
+
+.player-row-name {
+  color: #4a9d5b;
+  font-size: 1rem;
+}
+
+.player-row-info {
+  color: #666;
+  font-size: 0.8rem;
+}
+
+#new-player-btn {
+  padding: 10px 28px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  background: #4a9d5b;
+  color: white;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 8px;
+}
+
+#new-player-btn:hover {
+  background: #3d8a4d;
 }

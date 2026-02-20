@@ -8,11 +8,21 @@
 </head>
 <body>
   <div id="app">
-    <div id="top-bar">
-      <span id="level">Level 0</span>
-      <button id="new-game" class="hidden">New Game</button>
+    <!-- Game view -->
+    <div id="game-view">
+      <div id="top-bar">
+        <span id="level">Level 0</span>
+        <button id="new-game" class="hidden">New Game</button>
+        <span id="player-name"></span>
+      </div>
+      <div id="meta-board"></div>
     </div>
-    <div id="meta-board"></div>
+    <!-- Player selection view -->
+    <div id="players-view" class="hidden">
+      <div id="players-header">Players</div>
+      <div id="players-list"></div>
+      <button id="new-player-btn">New Player</button>
+    </div>
   </div>
   <script src="/game.js?v={{VERSION}}"></script>
 </body>

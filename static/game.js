@@ -7,27 +7,82 @@ const WIN_LINES = [
 let state = null;
 let busy = false;
 let gameRecorded = false;
+let currentPlayer = null;
 
-// Persistent difficulty state
-let level = parseInt(localStorage.getItem("ttt_level") || "0");
-let history = JSON.parse(localStorage.getItem("ttt_history") || "[]");
-if (level < 0) level = 0;
+// --- Player storage ---
+// ttt_players = { "name": { level, history, game, recorded } }
 
-function saveProgress() {
-  localStorage.setItem("ttt_level", level);
-  localStorage.setItem("ttt_history", JSON.stringify(history));
+function loadPlayers() {
+  return JSON.parse(localStorage.getItem("ttt_players") || "{}");
 }
 
-function saveGameState() {
-  if (state) {
-    localStorage.setItem("ttt_game", JSON.stringify(state));
-    localStorage.setItem("ttt_game_recorded", gameRecorded ? "1" : "0");
-  }
+function savePlayers(players) {
+  localStorage.setItem("ttt_players", JSON.stringify(players));
 }
 
-function clearGameState() {
-  localStorage.removeItem("ttt_game");
-  localStorage.removeItem("ttt_game_recorded");
+function loadCurrentPlayerName() {
+  return localStorage.getItem("ttt_current_player");
+}
+
+function saveCurrentPlayerName(name) {
+  localStorage.setItem("ttt_current_player", name);
+}
+
+function loadPlayerData(name) {
+  const players = loadPlayers();
+  return players[name] || { level: 0, history: [], game: null, recorded: false };
+}
+
+function savePlayerData(name, data) {
+  const players = loadPlayers();
+  players[name] = data;
+  savePlayers(players);
+}
+
+function getPlayerData() {
+  if (!currentPlayer) return null;
+  return loadPlayerData(currentPlayer);
+}
+
+function syncToPlayer() {
+  const data = getPlayerData();
+  if (!data) return;
+  level = data.level;
+  history = data.history || [];
+  state = data.game;
+  gameRecorded = data.recorded || false;
+}
+
+function syncFromPlayer() {
+  if (!currentPlayer) return;
+  savePlayerData(currentPlayer, {
+    level,
+    history,
+    game: state,
+    recorded: gameRecorded,
+  });
+}
+
+// --- Game state ---
+let level = 0;
+let history = [];
+
+// --- DOM refs ---
+const gameView = document.getElementById("game-view");
+const playersView = document.getElementById("players-view");
+const metaBoard = document.getElementById("meta-board");
+const newGameBtn = document.getElementById("new-game");
+const levelEl = document.getElementById("level");
+const playerNameEl = document.getElementById("player-name");
+const playersList = document.getElementById("players-list");
+const newPlayerBtn = document.getElementById("new-player-btn");
+
+function updateLevelDisplay() {
+  if (levelEl) levelEl.textContent = "Level " + level;
+}
+
+function updatePlayerNameDisplay() {
+  if (playerNameEl) playerNameEl.textContent = currentPlayer || "";
 }
 
 function recordResult(winner) {
@@ -41,19 +96,11 @@ function recordResult(winner) {
     if (level > 0) level--;
     history = [];
   }
-  saveProgress();
+  syncFromPlayer();
 }
 
-const metaBoard = document.getElementById("meta-board");
-const newGameBtn = document.getElementById("new-game");
-const levelEl = document.getElementById("level");
-
-function updateLevelDisplay() {
-  if (levelEl) levelEl.textContent = "Level " + level;
-}
-
-// Build DOM once
-const cells = []; // cells[board][cell] = element
+// --- Board ---
+const cells = [];
 function buildBoard() {
   metaBoard.innerHTML = "";
   for (let b = 0; b < 9; b++) {
@@ -82,16 +129,12 @@ function getLegalMoves(st) {
   } else {
     boards = [];
     for (let b = 0; b < 9; b++) {
-      if (!st.board_full[b]) {
-        boards.push(b);
-      }
+      if (!st.board_full[b]) boards.push(b);
     }
   }
   for (const b of boards) {
     for (let c = 0; c < 9; c++) {
-      if (st.cells[b][c] === "empty") {
-        moves.push([b, c]);
-      }
+      if (st.cells[b][c] === "empty") moves.push([b, c]);
     }
   }
   return moves;
@@ -100,9 +143,7 @@ function getLegalMoves(st) {
 function findWinLine(boardCells) {
   for (const line of WIN_LINES) {
     const a = boardCells[line[0]];
-    if (a !== "empty" && a === boardCells[line[1]] && a === boardCells[line[2]]) {
-      return line;
-    }
+    if (a !== "empty" && a === boardCells[line[1]] && a === boardCells[line[2]]) return line;
   }
   return null;
 }
@@ -118,19 +159,14 @@ function render() {
 
   for (let b = 0; b < 9; b++) {
     const boardEl = cells[b][0].parentElement;
-
-    // Board-level classes
     boardEl.className = "small-board";
 
-    // Find winning line for this board
     const winLine = (state.board_winners[b] !== "empty") ? findWinLine(state.cells[b]) : null;
     const winClass = state.board_winners[b] === "blue" ? "win-blue" : state.board_winners[b] === "red" ? "win-red" : null;
 
-    // Active board highlight
     if (isBluesTurn && state.required_board !== null && state.required_board !== undefined && state.required_board === b) {
       boardEl.classList.add("active");
-    } else if (isBluesTurn && (state.required_board === null || state.required_board === undefined) &&
-               !state.board_full[b]) {
+    } else if (isBluesTurn && (state.required_board === null || state.required_board === undefined) && !state.board_full[b]) {
       boardEl.classList.add("active");
     }
 
@@ -143,24 +179,15 @@ function render() {
 
       if (legal.has(`${b},${c}`)) el.classList.add("legal");
 
-      // Win-line markers
-      if (winLine && winClass && winLine.includes(c)) {
-        el.classList.add(winClass);
-      }
+      if (winLine && winClass && winLine.includes(c)) el.classList.add(winClass);
 
-      // Last-move markers for both players
-      if (state.last_blue && state.last_blue[0] === b && state.last_blue[1] === c) {
-        el.classList.add("last-move");
-      }
-      if (state.last_red && state.last_red[0] === b && state.last_red[1] === c) {
-        el.classList.add("last-move");
-      }
+      if (state.last_blue && state.last_blue[0] === b && state.last_blue[1] === c) el.classList.add("last-move");
+      if (state.last_red && state.last_red[0] === b && state.last_red[1] === c) el.classList.add("last-move");
     }
   }
 
-  // Game over: show new game button
   const gameOver = state.status === "bluewins" || state.status === "redwins" || state.status === "draw";
-  newGameBtn.classList.toggle("hidden", !gameOver);
+  newGameBtn.classList.toggle("btn-hidden", !gameOver);
   if (gameOver && !gameRecorded) {
     gameRecorded = true;
     const winner = state.status === "bluewins" ? "blue" : state.status === "redwins" ? "red" : "draw";
@@ -174,7 +201,6 @@ async function onCellClick(e) {
   const b = parseInt(e.target.dataset.board);
   const c = parseInt(e.target.dataset.cell);
 
-  // Client-side legality check
   const legal = getLegalMoves(state);
   if (!legal.some(([lb, lc]) => lb === b && lc === c)) return;
 
@@ -189,33 +215,20 @@ async function onCellClick(e) {
     if (data.ok) {
       state = data.state;
       render();
-      saveGameState();
+      syncFromPlayer();
     }
   } finally {
     busy = false;
   }
 }
 
-function newGame() {
-  clearGameState();
+async function newGame() {
   gameRecorded = false;
-  window.location = "/?v=" + Math.floor(Date.now() / 1000);
-}
-
-async function initGame() {
-  const saved = localStorage.getItem("ttt_game");
-  if (saved) {
-    state = JSON.parse(saved);
-    gameRecorded = localStorage.getItem("ttt_game_recorded") === "1";
-    updateLevelDisplay();
-    render();
-    return;
-  }
   busy = true;
   try {
     const resp = await fetch("/api/new", { method: "POST" });
     state = await resp.json();
-    saveGameState();
+    syncFromPlayer();
     updateLevelDisplay();
     render();
   } finally {
@@ -223,6 +236,80 @@ async function initGame() {
   }
 }
 
+// --- Views ---
+function showGameView() {
+  gameView.classList.remove("hidden");
+  playersView.classList.add("hidden");
+}
+
+function showPlayersView() {
+  gameView.classList.add("hidden");
+  playersView.classList.remove("hidden");
+  renderPlayersList();
+}
+
+function renderPlayersList() {
+  const players = loadPlayers();
+  playersList.innerHTML = "";
+  const names = Object.keys(players).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+  for (const name of names) {
+    const data = players[name];
+    const row = document.createElement("div");
+    row.className = "player-row";
+
+    const nameSpan = document.createElement("span");
+    nameSpan.className = "player-row-name";
+    nameSpan.textContent = name;
+
+    const infoSpan = document.createElement("span");
+    infoSpan.className = "player-row-info";
+    const status = data.game && (data.game.status === "bluetomove" || data.game.status === "redtomove")
+      ? "in progress" : "no game";
+    infoSpan.textContent = "Level " + (data.level || 0) + " \u00b7 " + status;
+
+    row.appendChild(nameSpan);
+    row.appendChild(infoSpan);
+    row.addEventListener("click", () => selectPlayer(name));
+    playersList.appendChild(row);
+  }
+}
+
+function selectPlayer(name) {
+  currentPlayer = name;
+  saveCurrentPlayerName(name);
+  syncToPlayer();
+  updatePlayerNameDisplay();
+  updateLevelDisplay();
+  showGameView();
+  if (state) {
+    gameRecorded = gameRecorded || false;
+    render();
+  } else {
+    newGame();
+  }
+}
+
+function promptNewPlayer() {
+  const name = prompt("Enter your name:");
+  if (!name || !name.trim()) return;
+  const trimmed = name.trim();
+  const players = loadPlayers();
+  if (!players[trimmed]) {
+    players[trimmed] = { level: 0, history: [], game: null, recorded: false };
+    savePlayers(players);
+  }
+  selectPlayer(trimmed);
+}
+
+// --- Init ---
+playerNameEl.addEventListener("click", showPlayersView);
 newGameBtn.addEventListener("click", newGame);
+newPlayerBtn.addEventListener("click", promptNewPlayer);
 buildBoard();
-initGame();
+
+const savedName = loadCurrentPlayerName();
+if (savedName && loadPlayers()[savedName]) {
+  selectPlayer(savedName);
+} else {
+  showPlayersView();
+}
