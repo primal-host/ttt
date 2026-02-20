@@ -104,7 +104,7 @@ body {
 }
 
 .small-board.active {
-  box-shadow: 0 0 0 2px #e89830;
+  box-shadow: 0 0 0 1px #e89830;
 }
 
 /* Win-line markers */
