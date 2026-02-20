@@ -111,8 +111,6 @@ body {
 }
 
 /* Win-line markers */
-.cell.win-blue::before,
-.cell.win-red::before,
 .cell.draw-marker::before {
   content: "";
   position: absolute;
