@@ -54,11 +54,11 @@ body {
 }
 
 #info-img {
-  width: 300px;
-  height: 250px;
+  max-width: 100%;
+  max-height: 100%;
   border-radius: 8px;
   filter: grayscale(100%);
-  object-fit: cover;
+  object-fit: contain;
 }
 
 #top-bar {
