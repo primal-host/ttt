@@ -1,0 +1,31 @@
+services:
+  ttt:
+    build: .
+    image: primal-host-ttt
+    container_name: primal-host-ttt
+    restart: unless-stopped
+    networks:
+      - infra
+    labels:
+      - "traefik.enable=true"
+
+      # Production HTTPS
+      - "traefik.http.routers.ttt.rule=Host(`ttt.primal.host`)"
+      - "traefik.http.routers.ttt.entrypoints=https"
+      - "traefik.http.routers.ttt.tls.certresolver=letsencrypt"
+
+      # HTTP -> HTTPS redirect
+      - "traefik.http.routers.ttt-redirect.rule=Host(`ttt.primal.host`)"
+      - "traefik.http.routers.ttt-redirect.entrypoints=http"
+      - "traefik.http.routers.ttt-redirect.middlewares=https-redirect"
+
+      # Local development
+      - "traefik.http.routers.ttt-local.rule=Host(`ttt.localhost`)"
+      - "traefik.http.routers.ttt-local.entrypoints=http"
+
+      # Service port
+      - "traefik.http.services.ttt.loadbalancer.server.port=3000"
+
+networks:
+  infra:
+    external: true
