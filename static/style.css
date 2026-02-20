@@ -83,10 +83,10 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
-  gap: 1px;
+  gap: 3px;
   width: 100%;
   aspect-ratio: 1;
-  background: rgba(74, 144, 217, 0.10);
+  background: transparent;
   border-radius: 8px;
   padding: 1px;
 }
