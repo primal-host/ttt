@@ -9,7 +9,7 @@ let busy = false;
 let gameRecorded = false;
 let currentPlayer = null;
 let stateHistory = [];
-let undoUsed = false;
+let assisted = false;
 
 // --- Player storage ---
 // ttt_players = { "name": { level, history, game, recorded } }
@@ -53,7 +53,7 @@ function syncToPlayer() {
   history = data.history || [];
   state = data.game;
   gameRecorded = data.recorded || false;
-  undoUsed = data.undoUsed || false;
+  assisted = data.assisted || false;
   stateHistory = data.stateHistory || [];
 }
 
@@ -64,7 +64,7 @@ function syncFromPlayer() {
     history,
     game: state,
     recorded: gameRecorded,
-    undoUsed,
+    assisted,
     stateHistory,
   });
 }
@@ -98,7 +98,7 @@ function updatePlayerNameDisplay() {
 }
 
 function recordResult(winner) {
-  if (undoUsed) {
+  if (assisted) {
     syncFromPlayer();
     return;
   }
@@ -269,10 +269,16 @@ async function onCellClick(e) {
   }
 }
 
+function hint() {
+  assisted = true;
+  syncFromPlayer();
+  // TODO: show hint
+}
+
 function undo() {
   if (busy || stateHistory.length === 0) return;
   state = stateHistory.pop();
-  undoUsed = true;
+  assisted = true;
   prevBoardWinners = null;
   syncFromPlayer();
   render();
@@ -282,7 +288,7 @@ async function newGame() {
   gameRecorded = false;
   prevBoardWinners = null;
   stateHistory = [];
-  undoUsed = false;
+  assisted = false;
 
   busy = true;
   try {
@@ -324,7 +330,7 @@ function moreGame() {
   gameRecorded = false;
   prevBoardWinners = null;
   stateHistory = [];
-  undoUsed = false;
+  assisted = false;
 
   syncFromPlayer();
   render();
@@ -398,6 +404,7 @@ function promptNewPlayer() {
 // --- Init ---
 playerNameEl.addEventListener("click", showPlayersView);
 undoBtn.addEventListener("click", undo);
+hintBtn.addEventListener("click", hint);
 continueBtn.addEventListener("click", moreGame);
 newPlayerBtn.addEventListener("click", promptNewPlayer);
 document.getElementById("level-count").textContent = MAX_LEVEL + 1;
