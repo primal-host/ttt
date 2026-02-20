@@ -67,6 +67,8 @@ function syncFromPlayer() {
 let level = 0;
 let history = [];
 
+let prevBoardWinners = null;
+
 // --- DOM refs ---
 const gameView = document.getElementById("game-view");
 const playersView = document.getElementById("players-view");
@@ -74,6 +76,11 @@ const metaBoard = document.getElementById("meta-board");
 const newGameBtn = document.getElementById("new-game");
 const levelEl = document.getElementById("level");
 const playerNameEl = document.getElementById("player-name");
+const infoImg = document.getElementById("info-img");
+
+function refreshImage() {
+  if (infoImg) infoImg.src = "https://picsum.photos/300/250?r=" + Math.random();
+}
 const playersList = document.getElementById("players-list");
 const newPlayerBtn = document.getElementById("new-player-btn");
 
@@ -186,6 +193,17 @@ function render() {
     }
   }
 
+  // Check if any board was just won
+  if (prevBoardWinners) {
+    for (let i = 0; i < 9; i++) {
+      if (state.board_winners[i] !== "empty" && prevBoardWinners[i] === "empty") {
+        refreshImage();
+        break;
+      }
+    }
+  }
+  prevBoardWinners = [...state.board_winners];
+
   const gameOver = state.status === "bluewins" || state.status === "redwins" || state.status === "draw";
   newGameBtn.classList.toggle("btn-hidden", !gameOver);
   if (gameOver && !gameRecorded) {
@@ -224,6 +242,8 @@ async function onCellClick(e) {
 
 async function newGame() {
   gameRecorded = false;
+  prevBoardWinners = null;
+  refreshImage();
   busy = true;
   try {
     const resp = await fetch("/api/new", { method: "POST" });
@@ -278,6 +298,8 @@ function selectPlayer(name) {
   currentPlayer = name;
   saveCurrentPlayerName(name);
   syncToPlayer();
+  prevBoardWinners = null;
+  refreshImage();
   updatePlayerNameDisplay();
   updateLevelDisplay();
   showGameView();
