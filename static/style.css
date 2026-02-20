@@ -163,16 +163,16 @@ body {
 #level, #player-name, #undo, #continue-btn, #hint {
   padding: 6px 20px;
   font-size: 0.9rem;
-  border: none;
+  border: 1px solid #333;
   border-radius: 6px;
-  background: #4a9d5b;
-  color: white;
+  background: #000;
+  color: #4a9d5b;
   cursor: pointer;
   transition: background 0.15s;
 }
 
 #level:hover, #player-name:hover, #undo:hover, #continue-btn:hover, #hint:hover {
-  background: #3d8a4d;
+  border-color: #4a9d5b;
 }
 
 #level, #player-name, #undo, #continue-btn, #hint {
@@ -242,17 +242,17 @@ body {
 #new-player-btn {
   padding: 10px 28px;
   font-size: 1rem;
-  border: none;
+  border: 1px solid #333;
   border-radius: 6px;
-  background: #4a9d5b;
-  color: white;
+  background: #000;
+  color: #4a9d5b;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: border-color 0.15s;
   margin-top: 8px;
 }
 
 #new-player-btn:hover {
-  background: #3d8a4d;
+  border-color: #4a9d5b;
 }
 
 #rules {
