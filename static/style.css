@@ -158,6 +158,10 @@ body {
   opacity: 0.5;
 }
 
+.cell.blue.dimmed {
+  background: #5ab86b;
+}
+
 .cell.half-dimmed {
   opacity: 0.75;
 }
