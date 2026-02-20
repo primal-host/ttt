@@ -548,6 +548,75 @@ fn pick_move(state: &GameState, level: u32, moves: &[(usize, usize)]) -> (usize,
     pick_random(&candidates)
 }
 
+fn best_move_for_blue(state: &GameState, moves: &[(usize, usize)]) -> (usize, usize) {
+    let mut best_score = i32::MAX;
+    let mut best_moves = Vec::new();
+    for &(b, c) in moves {
+        let mut s1 = state.clone();
+        apply_move(&mut s1, b, c, Cell::Blue);
+        let score = if s1.status != GameStatus::RedToMove {
+            evaluate(&s1)
+        } else {
+            let red_moves = legal_moves(&s1);
+            red_moves.iter().map(|&(rb, rc)| {
+                let mut s2 = s1.clone();
+                apply_move(&mut s2, rb, rc, Cell::Red);
+                evaluate(&s2)
+            }).max().unwrap_or(evaluate(&s1))
+        };
+        if score < best_score {
+            best_score = score;
+            best_moves = vec![(b, c)];
+        } else if score == best_score {
+            best_moves.push((b, c));
+        }
+    }
+    best_moves[0]
+}
+
+fn generate_explanation(state: &GameState, board_idx: usize, cell_idx: usize) -> String {
+    let wins_board = state.board_winners[board_idx] == Cell::Empty
+        && would_win_board(&state.cells[board_idx], cell_idx, Cell::Blue);
+    let wins_meta = wins_board
+        && would_win_meta(&state.board_winners, board_idx, Cell::Blue);
+
+    if wins_board && wins_meta {
+        return "Wins the game!".into();
+    }
+    if wins_board && creates_meta_threat(&state.board_winners, board_idx, Cell::Blue) {
+        return "Wins board and threatens the game".into();
+    }
+    if wins_board {
+        return "Wins a board".into();
+    }
+
+    // Check if it blocks red from winning a board
+    if state.board_winners[board_idx] == Cell::Empty
+        && would_win_board(&state.cells[board_idx], cell_idx, Cell::Red)
+    {
+        return "Blocks red from winning a board".into();
+    }
+
+    // Check meta threat (only if winning the board, which we need to simulate)
+    // Actually check if placing here creates a meta threat via board win potential
+    if creates_meta_threat(&state.board_winners, board_idx, Cell::Blue) {
+        return "Threatens to win the game".into();
+    }
+
+    if state.board_winners[board_idx] == Cell::Empty
+        && creates_fork(&state.cells[board_idx], cell_idx, Cell::Blue)
+    {
+        return "Creates two ways to win a board".into();
+    }
+
+    // Sends opponent to a full board (free choice for blue next)
+    if state.board_full[cell_idx] {
+        return "Gives you a free choice next".into();
+    }
+
+    "Best positional move".into()
+}
+
 fn computer_move(state: &mut GameState, level: u32) {
     let moves = legal_moves(state);
     if moves.is_empty() { return; }
@@ -570,6 +639,18 @@ struct MoveResponse {
     state: GameState,
     #[serde(skip_serializing_if = "Option::is_none")]
     error: Option<String>,
+}
+
+#[derive(Deserialize)]
+struct HintRequest {
+    state: GameState,
+}
+
+#[derive(Serialize)]
+struct HintResponse {
+    board_idx: usize,
+    cell_idx: usize,
+    explanation: String,
 }
 
 fn now_secs() -> u64 {
@@ -651,12 +732,48 @@ async fn handle_move(Json(req): Json<MoveRequest>) -> impl IntoResponse {
     )
 }
 
+async fn handle_hint(Json(req): Json<HintRequest>) -> impl IntoResponse {
+    let state = req.state;
+    if state.status != GameStatus::BlueToMove {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(HintResponse {
+                board_idx: 0,
+                cell_idx: 0,
+                explanation: "Not blue's turn".into(),
+            }),
+        );
+    }
+    let moves = legal_moves(&state);
+    if moves.is_empty() {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(HintResponse {
+                board_idx: 0,
+                cell_idx: 0,
+                explanation: "No legal moves".into(),
+            }),
+        );
+    }
+    let (b, c) = best_move_for_blue(&state, &moves);
+    let explanation = generate_explanation(&state, b, c);
+    (
+        StatusCode::OK,
+        Json(HintResponse {
+            board_idx: b,
+            cell_idx: c,
+            explanation,
+        }),
+    )
+}
+
 #[tokio::main]
 async fn main() {
     let app = Router::new()
         .route("/", get(handle_index))
         .route("/api/new", post(handle_new))
         .route("/api/move", post(handle_move))
+        .route("/api/hint", post(handle_hint))
         .fallback_service(ServeDir::new("static"));
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
