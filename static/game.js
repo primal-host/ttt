@@ -401,9 +401,6 @@ function renderPlayersList() {
   const names = Object.keys(players).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
   for (const name of names) {
     const data = players[name];
-    const wrapper = document.createElement("div");
-    wrapper.className = "player-entry";
-
     const row = document.createElement("div");
     row.className = "player-row";
     row.addEventListener("click", () => selectPlayer(name));
@@ -416,9 +413,6 @@ function renderPlayersList() {
     infoSpan.className = "player-row-info";
     infoSpan.textContent = "Level " + (data.level || 0);
 
-    row.appendChild(nameSpan);
-    row.appendChild(infoSpan);
-
     const clearBtn = document.createElement("button");
     clearBtn.className = "player-row-clear";
     clearBtn.textContent = "Clear Board";
@@ -427,9 +421,10 @@ function renderPlayersList() {
       clearPlayerBoard(name);
     });
 
-    wrapper.appendChild(row);
-    wrapper.appendChild(clearBtn);
-    playersList.appendChild(wrapper);
+    row.appendChild(nameSpan);
+    row.appendChild(infoSpan);
+    row.appendChild(clearBtn);
+    playersList.appendChild(row);
   }
 }
 

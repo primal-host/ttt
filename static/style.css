@@ -239,23 +239,14 @@ body {
   gap: 8px;
 }
 
-.player-entry {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
 .player-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 12px 16px;
   background: #1a1a1a;
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.15s;
-  width: 100%;
 }
 
 .player-row:hover {
@@ -265,11 +256,14 @@ body {
 .player-row-name {
   color: #4a9d5b;
   font-size: 1rem;
+  flex: 1;
 }
 
 .player-row-info {
   color: #666;
   font-size: 0.8rem;
+  flex: 1;
+  text-align: center;
 }
 
 .player-row-clear {
