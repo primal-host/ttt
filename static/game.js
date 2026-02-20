@@ -64,6 +64,7 @@ function syncFromPlayer() {
 }
 
 // --- Game state ---
+const MAX_LEVEL = 14;
 let level = 0;
 let history = [];
 
@@ -336,6 +337,7 @@ function promptNewPlayer() {
 playerNameEl.addEventListener("click", showPlayersView);
 newGameBtn.addEventListener("click", newGame);
 newPlayerBtn.addEventListener("click", promptNewPlayer);
+document.getElementById("level-count").textContent = MAX_LEVEL + 1;
 buildBoard();
 
 const savedName = loadCurrentPlayerName();
