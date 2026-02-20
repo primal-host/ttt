@@ -206,8 +206,11 @@ function render() {
     const boardEl = cells[b][0].parentElement;
     boardEl.className = "small-board";
 
-    const winLine = (state.board_winners[b] !== "empty") ? findWinLine(state.cells[b]) : null;
-    const dead = (state.board_winners[b] === "empty") && isBoardDead(state.cells[b]);
+    const won = state.board_winners[b] !== "empty";
+    const winLine = won ? findWinLine(state.cells[b]) : null;
+    const dead = !won && isBoardDead(state.cells[b]);
+
+    if (won) boardEl.classList.add("won");
 
     if (metaWinLine && metaWinLine.includes(b)) {
       boardEl.classList.add("meta-winner");
