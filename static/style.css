@@ -173,12 +173,7 @@ body {
   margin: 0 5px;
 }
 
-#game-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-#undo, #new-game, #more-game {
+#undo, #continue-btn {
   padding: 6px 20px;
   font-size: 0.9rem;
   border: none;
@@ -189,12 +184,16 @@ body {
   transition: background 0.15s;
 }
 
-#undo:hover, #new-game:hover, #more-game:hover {
+#undo:hover, #continue-btn:hover {
   background: #3d8a4d;
 }
 
+#continue-btn {
+  margin: 0 auto;
+}
+
 .btn-hidden {
-  visibility: hidden;
+  display: none;
 }
 
 /* Players view */
