@@ -306,16 +306,24 @@ async function newGame() {
 function moreGame() {
   if (!state) return;
 
-  for (let b = 0; b < 9; b++) {
-    if (state.board_winners[b] !== "empty" || isBoardDead(state.cells[b])) {
-      state.cells[b] = ["empty","empty","empty","empty","empty","empty","empty","empty","empty"];
-      state.board_winners[b] = "empty";
-      state.board_full[b] = false;
-    }
+  const metaWinLine = findWinLine(state.board_winners);
+  const clearSet = new Set();
+
+  // Winning boards
+  if (metaWinLine) for (const b of metaWinLine) clearSet.add(b);
+  // Full boards
+  for (let b = 0; b < 9; b++) if (state.board_full[b]) clearSet.add(b);
+  // Center board
+  clearSet.add(4);
+
+  for (const b of clearSet) {
+    state.cells[b] = ["empty","empty","empty","empty","empty","empty","empty","empty","empty"];
+    state.board_winners[b] = "empty";
+    state.board_full[b] = false;
   }
 
   state.status = "bluetomove";
-  state.required_board = null;
+  state.required_board = 4;
   state.last_blue = null;
   state.last_red = null;
 
