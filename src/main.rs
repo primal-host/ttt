@@ -183,6 +183,22 @@ fn computer_move(state: &mut GameState, level: u32) {
                         .copied()
                         .collect();
                     *most_empty.choose(&mut rand::thread_rng()).unwrap()
+                } else if level >= 5 {
+                    // Avoid sending opponent where they can win a board in one move
+                    let safe: Vec<_> = moves.iter()
+                        .filter(|&&(_, c)| {
+                            // Check if blue has any winning move on board c
+                            !state.cells[c].iter().enumerate().any(|(i, &cell)| {
+                                cell == Cell::Empty && would_win_board(&state.cells[c], i, Cell::Blue)
+                            })
+                        })
+                        .copied()
+                        .collect();
+                    if !safe.is_empty() {
+                        *safe.choose(&mut rand::thread_rng()).unwrap()
+                    } else {
+                        *moves.choose(&mut rand::thread_rng()).unwrap()
+                    }
                 } else {
                     *moves.choose(&mut rand::thread_rng()).unwrap()
                 }
