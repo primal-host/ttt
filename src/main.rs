@@ -195,7 +195,31 @@ fn computer_move(state: &mut GameState, level: u32) {
                         .copied()
                         .collect();
                     if !safe.is_empty() {
-                        *safe.choose(&mut rand::thread_rng()).unwrap()
+                        if level >= 6 {
+                            // Send opponent to a board where their only move sends us somewhere we can win
+                            let trap: Vec<_> = safe.iter()
+                                .filter(|&&(_, c)| {
+                                    let empties: Vec<usize> = state.cells[c].iter().enumerate()
+                                        .filter(|(_, &cell)| cell == Cell::Empty)
+                                        .map(|(i, _)| i)
+                                        .collect();
+                                    empties.len() == 1 && {
+                                        let dest = empties[0];
+                                        state.cells[dest].iter().enumerate().any(|(i, &cell)| {
+                                            cell == Cell::Empty && would_win_board(&state.cells[dest], i, Cell::Red)
+                                        })
+                                    }
+                                })
+                                .copied()
+                                .collect();
+                            if !trap.is_empty() {
+                                *trap.choose(&mut rand::thread_rng()).unwrap()
+                            } else {
+                                *safe.choose(&mut rand::thread_rng()).unwrap()
+                            }
+                        } else {
+                            *safe.choose(&mut rand::thread_rng()).unwrap()
+                        }
                     } else {
                         *moves.choose(&mut rand::thread_rng()).unwrap()
                     }
