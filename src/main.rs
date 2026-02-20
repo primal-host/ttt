@@ -96,8 +96,8 @@ fn apply_move(state: &mut GameState, board_idx: usize, cell_idx: usize, player: 
         _ => {}
     }
 
-    // Set required board for next move
-    if state.board_winners[cell_idx] != Cell::Empty || state.board_full[cell_idx] {
+    // Set required board for next move (only full boards trigger free choice)
+    if state.board_full[cell_idx] {
         state.required_board = None;
     } else {
         state.required_board = Some(cell_idx);
@@ -125,7 +125,7 @@ fn legal_moves(state: &GameState) -> Vec<(usize, usize)> {
     let boards: Vec<usize> = match state.required_board {
         Some(b) => vec![b],
         None => (0..9)
-            .filter(|&b| state.board_winners[b] == Cell::Empty && !state.board_full[b])
+            .filter(|&b| !state.board_full[b])
             .collect(),
     };
     for b in boards {

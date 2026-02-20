@@ -71,7 +71,7 @@ function getLegalMoves(st) {
   } else {
     boards = [];
     for (let b = 0; b < 9; b++) {
-      if (st.board_winners[b] === "empty" && !st.board_full[b]) {
+      if (!st.board_full[b]) {
         boards.push(b);
       }
     }
@@ -107,7 +107,7 @@ function render() {
     if (isBluesTurn && state.required_board !== null && state.required_board !== undefined && state.required_board === b) {
       boardEl.classList.add("active");
     } else if (isBluesTurn && (state.required_board === null || state.required_board === undefined) &&
-               state.board_winners[b] === "empty" && !state.board_full[b]) {
+               !state.board_full[b]) {
       boardEl.classList.add("active");
     }
 
