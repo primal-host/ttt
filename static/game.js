@@ -90,14 +90,11 @@ function render() {
 
       if (legal.has(`${b},${c}`)) el.classList.add("legal");
 
-      // Last-move markers
-      if (state.last_blue && state.last_blue[0] === b && state.last_blue[1] === c) {
-        el.classList.add("last-blue");
-        if (isBluesTurn) el.classList.add("current-turn");
-      }
+      // Last-move marker on the most recent move
       if (state.last_red && state.last_red[0] === b && state.last_red[1] === c) {
-        el.classList.add("last-red");
-        if (!isBluesTurn && state.status === "redtomove") el.classList.add("current-turn");
+        el.classList.add("last-move");
+      } else if (!state.last_red && state.last_blue && state.last_blue[0] === b && state.last_blue[1] === c) {
+        el.classList.add("last-move");
       }
     }
   }
@@ -106,12 +103,8 @@ function render() {
   statusEl.className = "";
   switch (state.status) {
     case "bluetomove":
-      statusEl.textContent = "Your turn";
-      statusEl.classList.add("blue");
-      break;
     case "redtomove":
-      statusEl.textContent = "Computer thinking...";
-      statusEl.classList.add("red");
+      statusEl.textContent = "";
       break;
     case "bluewins":
       statusEl.textContent = "You win!";

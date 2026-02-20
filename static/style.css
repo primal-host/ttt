@@ -106,9 +106,8 @@ h1 {
   border: 1px solid #e89830;
 }
 
-/* Last-move markers */
-.cell.last-blue::after,
-.cell.last-red::after {
+/* Last-move marker */
+.cell.last-move::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -119,14 +118,6 @@ h1 {
   border-radius: 50%;
   border: 2px solid white;
   pointer-events: none;
-}
-
-.cell.last-blue.current-turn::after {
-  background: white;
-}
-
-.cell.last-red.current-turn::after {
-  background: white;
 }
 
 #new-game {
