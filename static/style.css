@@ -151,6 +151,20 @@ body {
   z-index: 1;
 }
 
+.cell.hint::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20%;
+  height: 20%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: white;
+  pointer-events: none;
+  z-index: 1;
+}
+
 /* Last-move marker */
 .cell.last-move::after {
   content: "";
