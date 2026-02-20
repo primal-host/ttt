@@ -294,9 +294,7 @@ function renderPlayersList() {
 
     const infoSpan = document.createElement("span");
     infoSpan.className = "player-row-info";
-    const status = data.game && (data.game.status === "bluetomove" || data.game.status === "redtomove")
-      ? "in progress" : "no game";
-    infoSpan.textContent = "Level " + (data.level || 0) + " \u00b7 " + status;
+    infoSpan.textContent = "Level " + (data.level || 0);
 
     row.appendChild(nameSpan);
     row.appendChild(infoSpan);
