@@ -174,6 +174,15 @@ fn computer_move(state: &mut GameState, level: u32) {
                     .collect();
                 if !to_empty.is_empty() {
                     *to_empty.choose(&mut rand::thread_rng()).unwrap()
+                } else if level >= 4 {
+                    // Send opponent to the board with the most empty cells
+                    let empty_count = |c: usize| state.cells[c].iter().filter(|&&cell| cell == Cell::Empty).count();
+                    let max_empty = moves.iter().map(|&(_, c)| empty_count(c)).max().unwrap();
+                    let most_empty: Vec<_> = moves.iter()
+                        .filter(|&&(_, c)| empty_count(c) == max_empty)
+                        .copied()
+                        .collect();
+                    *most_empty.choose(&mut rand::thread_rng()).unwrap()
                 } else {
                     *moves.choose(&mut rand::thread_rng()).unwrap()
                 }
