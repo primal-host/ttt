@@ -64,7 +64,7 @@ h1 {
 }
 
 .small-board.active {
-  box-shadow: 0 0 0 3px #e89830;
+  box-shadow: 0 0 0 1px rgba(232, 152, 48, 0.25);
 }
 
 .small-board.won-blue {
