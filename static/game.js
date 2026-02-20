@@ -81,8 +81,7 @@ const gameView = document.getElementById("game-view");
 const playersView = document.getElementById("players-view");
 const metaBoard = document.getElementById("meta-board");
 const undoBtn = document.getElementById("undo");
-const newGameBtn = document.getElementById("new-game");
-const moreGameBtn = document.getElementById("more-game");
+const continueBtn = document.getElementById("continue-btn");
 const levelEl = document.getElementById("level");
 const playerNameEl = document.getElementById("player-name");
 
@@ -232,8 +231,7 @@ function render() {
 
   const gameOver = state.status === "bluewins" || state.status === "redwins" || state.status === "draw";
   undoBtn.classList.toggle("btn-hidden", gameOver || stateHistory.length === 0);
-  newGameBtn.classList.toggle("btn-hidden", !gameOver);
-  moreGameBtn.classList.toggle("btn-hidden", !gameOver);
+  continueBtn.classList.toggle("btn-hidden", !gameOver);
   if (gameOver && !gameRecorded) {
     gameRecorded = true;
     const winner = state.status === "bluewins" ? "blue" : state.status === "redwins" ? "red" : "draw";
@@ -398,8 +396,7 @@ function promptNewPlayer() {
 // --- Init ---
 playerNameEl.addEventListener("click", showPlayersView);
 undoBtn.addEventListener("click", undo);
-newGameBtn.addEventListener("click", newGame);
-moreGameBtn.addEventListener("click", moreGame);
+continueBtn.addEventListener("click", moreGame);
 newPlayerBtn.addEventListener("click", promptNewPlayer);
 document.getElementById("level-count").textContent = MAX_LEVEL + 1;
 buildBoard();
