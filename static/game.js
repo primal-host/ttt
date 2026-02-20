@@ -18,6 +18,18 @@ function saveProgress() {
   localStorage.setItem("ttt_history", JSON.stringify(history));
 }
 
+function saveGameState() {
+  if (state) {
+    localStorage.setItem("ttt_game", JSON.stringify(state));
+    localStorage.setItem("ttt_game_recorded", gameRecorded ? "1" : "0");
+  }
+}
+
+function clearGameState() {
+  localStorage.removeItem("ttt_game");
+  localStorage.removeItem("ttt_game_recorded");
+}
+
 function recordResult(winner) {
   history.push(winner);
   if (history.length > 3) history = history.slice(-3);
@@ -177,6 +189,7 @@ async function onCellClick(e) {
     if (data.ok) {
       state = data.state;
       render();
+      saveGameState();
     }
   } finally {
     busy = false;
@@ -184,14 +197,25 @@ async function onCellClick(e) {
 }
 
 function newGame() {
+  clearGameState();
+  gameRecorded = false;
   window.location = "/?v=" + Math.floor(Date.now() / 1000);
 }
 
 async function initGame() {
+  const saved = localStorage.getItem("ttt_game");
+  if (saved) {
+    state = JSON.parse(saved);
+    gameRecorded = localStorage.getItem("ttt_game_recorded") === "1";
+    updateLevelDisplay();
+    render();
+    return;
+  }
   busy = true;
   try {
     const resp = await fetch("/api/new", { method: "POST" });
     state = await resp.json();
+    saveGameState();
     updateLevelDisplay();
     render();
   } finally {
