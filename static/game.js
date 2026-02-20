@@ -13,6 +13,15 @@ let assisted = false;
 let hintMove = null;
 let hintText = "";
 
+// --- Admin storage ---
+function loadAdmin() {
+  return localStorage.getItem("ttt_admin");
+}
+
+function saveAdmin(name) {
+  localStorage.setItem("ttt_admin", name);
+}
+
 // --- Player storage ---
 // ttt_players = { "name": { level, history, game, recorded } }
 
@@ -386,6 +395,57 @@ function clearPlayerBoard(name) {
   newGame();
 }
 
+// --- Admin actions ---
+function renamePlayer(oldName) {
+  const newName = prompt("Rename " + oldName + " to:", oldName);
+  if (!newName || !newName.trim() || newName.trim() === oldName) return;
+  const trimmed = newName.trim();
+  const players = loadPlayers();
+  if (players[trimmed]) { alert("A player named " + trimmed + " already exists."); return; }
+  players[trimmed] = players[oldName];
+  delete players[oldName];
+  savePlayers(players);
+  if (loadAdmin() === oldName) saveAdmin(trimmed);
+  if (currentPlayer === oldName) {
+    currentPlayer = trimmed;
+    saveCurrentPlayerName(trimmed);
+    updatePlayerNameDisplay();
+  }
+  renderPlayersList();
+}
+
+function resetPlayer(name) {
+  if (!confirm("Reset " + name + " to level 0?")) return;
+  const players = loadPlayers();
+  if (!players[name]) return;
+  players[name].level = 0;
+  players[name].history = [];
+  players[name].game = null;
+  players[name].recorded = false;
+  players[name].assisted = false;
+  players[name].stateHistory = [];
+  savePlayers(players);
+  if (currentPlayer === name) {
+    syncToPlayer();
+    updateLevelDisplay();
+  }
+  renderPlayersList();
+}
+
+function deletePlayer(name) {
+  if (!confirm("Delete " + name + " and all their data?")) return;
+  const players = loadPlayers();
+  delete players[name];
+  savePlayers(players);
+  if (currentPlayer === name) {
+    currentPlayer = null;
+    saveCurrentPlayerName("");
+    state = null;
+    updatePlayerNameDisplay();
+  }
+  renderPlayersList();
+}
+
 // --- Views ---
 function showGameView() {
   gameView.classList.remove("hidden");
@@ -401,6 +461,8 @@ function showPlayersView() {
 function renderPlayersList() {
   const players = loadPlayers();
   playersList.innerHTML = "";
+  const admin = loadAdmin();
+  const isAdmin = currentPlayer === admin;
   const names = Object.keys(players).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
   for (const name of names) {
     const data = players[name];
@@ -427,6 +489,28 @@ function renderPlayersList() {
     row.appendChild(nameSpan);
     row.appendChild(infoSpan);
     row.appendChild(clearBtn);
+
+    if (isAdmin && name !== admin) {
+      const renameBtn = document.createElement("button");
+      renameBtn.className = "player-row-action";
+      renameBtn.textContent = "Rename";
+      renameBtn.addEventListener("click", (e) => { e.stopPropagation(); renamePlayer(name); });
+
+      const resetBtn = document.createElement("button");
+      resetBtn.className = "player-row-action";
+      resetBtn.textContent = "Reset";
+      resetBtn.addEventListener("click", (e) => { e.stopPropagation(); resetPlayer(name); });
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "player-row-action";
+      deleteBtn.textContent = "Delete";
+      deleteBtn.addEventListener("click", (e) => { e.stopPropagation(); deletePlayer(name); });
+
+      row.appendChild(renameBtn);
+      row.appendChild(resetBtn);
+      row.appendChild(deleteBtn);
+    }
+
     playersList.appendChild(row);
   }
 }
@@ -456,6 +540,7 @@ function promptNewPlayer() {
   if (!players[trimmed]) {
     players[trimmed] = { level: 0, history: [], game: null, recorded: false };
     savePlayers(players);
+    if (!loadAdmin()) saveAdmin(trimmed);
   }
   selectPlayer(trimmed);
 }
@@ -468,6 +553,15 @@ continueBtn.addEventListener("click", moreGame);
 newPlayerBtn.addEventListener("click", promptNewPlayer);
 document.getElementById("level-count").textContent = MAX_LEVEL + 1;
 buildBoard();
+
+// Migrate: set admin if not set but players exist
+if (!loadAdmin()) {
+  const existingPlayers = Object.keys(loadPlayers());
+  if (existingPlayers.length > 0) {
+    existingPlayers.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+    saveAdmin(existingPlayers[0]);
+  }
+}
 
 const savedName = loadCurrentPlayerName();
 if (savedName && loadPlayers()[savedName]) {
