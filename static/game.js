@@ -365,6 +365,24 @@ function moreGame() {
   render();
 }
 
+function clearPlayerBoard(name) {
+  const data = loadPlayerData(name);
+  data.game = null;
+  data.recorded = false;
+  data.assisted = false;
+  data.stateHistory = [];
+  savePlayerData(name, data);
+  if (currentPlayer === name) {
+    state = null;
+    gameRecorded = false;
+    assisted = false;
+    stateHistory = [];
+    hintMove = null;
+    hintText = "";
+  }
+  renderPlayersList();
+}
+
 // --- Views ---
 function showGameView() {
   gameView.classList.remove("hidden");
@@ -385,6 +403,7 @@ function renderPlayersList() {
     const data = players[name];
     const row = document.createElement("div");
     row.className = "player-row";
+    row.addEventListener("click", () => selectPlayer(name));
 
     const nameSpan = document.createElement("span");
     nameSpan.className = "player-row-name";
@@ -394,9 +413,17 @@ function renderPlayersList() {
     infoSpan.className = "player-row-info";
     infoSpan.textContent = "Level " + (data.level || 0);
 
+    const clearBtn = document.createElement("button");
+    clearBtn.className = "player-row-clear";
+    clearBtn.textContent = "Clear Board";
+    clearBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      clearPlayerBoard(name);
+    });
+
     row.appendChild(nameSpan);
     row.appendChild(infoSpan);
-    row.addEventListener("click", () => selectPlayer(name));
+    row.appendChild(clearBtn);
     playersList.appendChild(row);
   }
 }

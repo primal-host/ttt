@@ -242,7 +242,6 @@ body {
 .player-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   padding: 12px 16px;
   background: #1a1a1a;
   border-radius: 6px;
@@ -257,11 +256,35 @@ body {
 .player-row-name {
   color: #4a9d5b;
   font-size: 1rem;
+  flex: 1;
 }
 
 .player-row-info {
   color: #666;
   font-size: 0.8rem;
+  flex: 1;
+  text-align: center;
+}
+
+.player-row-clear {
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border: 1px solid #333;
+  border-radius: 4px;
+  background: #000;
+  color: #666;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  flex: 1;
+  text-align: right;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.player-row-clear:hover {
+  border-color: #4a9d5b;
+  color: #4a9d5b;
 }
 
 #new-player-btn {
