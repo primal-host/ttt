@@ -41,25 +41,6 @@ body {
   justify-content: center;
 }
 
-#info-box {
-  width: 320px;
-  height: 270px;
-  border: 1px solid #333;
-  border-radius: 12px;
-  padding: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-#info-img {
-  max-width: 100%;
-  max-height: 100%;
-  border-radius: 8px;
-  filter: grayscale(100%);
-  object-fit: contain;
-}
 
 
 #top-bar {

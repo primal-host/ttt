@@ -78,19 +78,7 @@ const newGameBtn = document.getElementById("new-game");
 const moreGameBtn = document.getElementById("more-game");
 const levelEl = document.getElementById("level");
 const playerNameEl = document.getElementById("player-name");
-const infoImg = document.getElementById("info-img");
 
-const IMAGE_SOURCES = [
-  "https://picsum.photos/300/250",
-  "https://picsum.dev/300/250",
-  "https://loremflickr.com/300/250",
-];
-
-function refreshInfoBox() {
-  if (!infoImg) return;
-  const source = IMAGE_SOURCES[Math.floor(Math.random() * IMAGE_SOURCES.length)];
-  infoImg.src = source + "?r=" + Math.random();
-}
 const playersList = document.getElementById("players-list");
 const newPlayerBtn = document.getElementById("new-player-btn");
 
@@ -224,7 +212,7 @@ function render() {
   if (prevBoardWinners) {
     for (let i = 0; i < 9; i++) {
       if (state.board_winners[i] !== "empty" && prevBoardWinners[i] === "empty") {
-        refreshInfoBox();
+
         break;
       }
     }
@@ -271,7 +259,7 @@ async function onCellClick(e) {
 async function newGame() {
   gameRecorded = false;
   prevBoardWinners = null;
-  refreshInfoBox();
+
   busy = true;
   try {
     const resp = await fetch("/api/new", { method: "POST" });
@@ -312,7 +300,7 @@ function moreGame() {
   gameRecorded = false;
   prevBoardWinners = null;
 
-  refreshInfoBox();
+
   syncFromPlayer();
   render();
 }
@@ -358,7 +346,7 @@ function selectPlayer(name) {
   saveCurrentPlayerName(name);
   syncToPlayer();
   prevBoardWinners = null;
-  refreshInfoBox();
+
   updatePlayerNameDisplay();
   updateLevelDisplay();
   showGameView();
