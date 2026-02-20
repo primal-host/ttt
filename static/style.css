@@ -168,10 +168,14 @@ body {
   background: #000;
   color: #4a9d5b;
   cursor: pointer;
-  transition: background 0.15s;
+  transition: border-color 0.15s;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
 }
 
-#level:hover, #player-name:hover, #undo:hover, #continue-btn:hover, #hint:hover {
+#level:hover, #player-name:hover, #undo:hover, #continue-btn:hover, #hint:hover,
+#level:active, #player-name:active, #undo:active, #continue-btn:active, #hint:active {
   border-color: #4a9d5b;
 }
 
