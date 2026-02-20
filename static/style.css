@@ -194,7 +194,12 @@ body {
   color: #666;
 }
 
-#new-game {
+#game-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+#new-game, #more-game {
   padding: 6px 20px;
   font-size: 0.9rem;
   border: none;
@@ -205,11 +210,11 @@ body {
   transition: background 0.15s;
 }
 
-#new-game:hover {
+#new-game:hover, #more-game:hover {
   background: #3d8a4d;
 }
 
-#new-game.btn-hidden {
+.btn-hidden {
   visibility: hidden;
 }
 
