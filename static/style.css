@@ -56,7 +56,7 @@ h1 {
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
   gap: 2px;
-  background: #2a2a3e;
+  background: #000;
   border-radius: 4px;
   padding: 2px;
   position: relative;
