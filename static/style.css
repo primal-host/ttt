@@ -78,6 +78,7 @@ body {
   font-size: 0.9rem;
   color: #4a9d5b;
   cursor: pointer;
+  margin: 0 5px;
 }
 
 #player-name:hover {
@@ -192,6 +193,7 @@ body {
 #level {
   font-size: 0.9rem;
   color: #666;
+  margin: 0 5px;
 }
 
 #game-buttons {
