@@ -172,6 +172,8 @@ function render() {
     : new Set();
 
   const isBluesTurn = state.status === "bluetomove";
+  const gameWon = state.status === "bluewins" || state.status === "redwins";
+  const metaWinLine = gameWon ? findWinLine(state.board_winners) : null;
 
   for (let b = 0; b < 9; b++) {
     const boardEl = cells[b][0].parentElement;
@@ -195,7 +197,8 @@ function render() {
 
       if (legal.has(`${b},${c}`)) el.classList.add("legal");
 
-      if (winLine && !winLine.includes(c)) el.classList.add("dimmed");
+      if (metaWinLine && !metaWinLine.includes(b)) el.classList.add("dimmed");
+      else if (winLine && !winLine.includes(c)) el.classList.add("dimmed");
       if (dead && state.cells[b][c] !== "empty") el.classList.add("dimmed");
 
       if (state.last_blue && state.last_blue[0] === b && state.last_blue[1] === c) el.classList.add("last-move");
