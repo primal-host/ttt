@@ -75,6 +75,7 @@ const gameView = document.getElementById("game-view");
 const playersView = document.getElementById("players-view");
 const metaBoard = document.getElementById("meta-board");
 const newGameBtn = document.getElementById("new-game");
+const moreGameBtn = document.getElementById("more-game");
 const levelEl = document.getElementById("level");
 const playerNameEl = document.getElementById("player-name");
 const infoImg = document.getElementById("info-img");
@@ -251,6 +252,7 @@ function render() {
 
   const gameOver = state.status === "bluewins" || state.status === "redwins" || state.status === "draw";
   newGameBtn.classList.toggle("btn-hidden", !gameOver);
+  moreGameBtn.classList.toggle("btn-hidden", !gameOver);
   if (gameOver && !gameRecorded) {
     gameRecorded = true;
     const winner = state.status === "bluewins" ? "blue" : state.status === "redwins" ? "red" : "draw";
@@ -299,6 +301,30 @@ async function newGame() {
   } finally {
     busy = false;
   }
+}
+
+function moreGame() {
+  if (!state) return;
+
+  for (let b = 0; b < 9; b++) {
+    if (state.board_winners[b] !== "empty") {
+      state.cells[b] = ["empty","empty","empty","empty","empty","empty","empty","empty","empty"];
+      state.board_winners[b] = "empty";
+      state.board_full[b] = false;
+    }
+  }
+
+  state.status = "bluetomove";
+  state.required_board = null;
+  state.last_blue = null;
+  state.last_red = null;
+
+  gameRecorded = false;
+  prevBoardWinners = null;
+
+  refreshInfoBox(true);
+  syncFromPlayer();
+  render();
 }
 
 // --- Views ---
@@ -369,6 +395,7 @@ function promptNewPlayer() {
 // --- Init ---
 playerNameEl.addEventListener("click", showPlayersView);
 newGameBtn.addEventListener("click", newGame);
+moreGameBtn.addEventListener("click", moreGame);
 newPlayerBtn.addEventListener("click", promptNewPlayer);
 document.getElementById("level-count").textContent = MAX_LEVEL + 1;
 buildBoard();
