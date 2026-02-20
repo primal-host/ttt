@@ -187,6 +187,7 @@ function render() {
       if (legal.has(`${b},${c}`)) el.classList.add("legal");
 
       if (winLine && winClass && winLine.includes(c)) el.classList.add(winClass);
+      if (winLine && !winLine.includes(c)) el.classList.add("dimmed");
 
       if (state.last_blue && state.last_blue[0] === b && state.last_blue[1] === c) el.classList.add("last-move");
       if (state.last_red && state.last_red[0] === b && state.last_red[1] === c) el.classList.add("last-move");

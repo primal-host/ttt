@@ -145,6 +145,10 @@ body {
   border-radius: 8px;
 }
 
+.cell.dimmed {
+  opacity: 0.3;
+}
+
 .cell.legal {
   cursor: pointer;
 }
