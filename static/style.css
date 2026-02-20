@@ -50,18 +50,9 @@ body {
   justify-content: space-between;
   width: 100%;
   height: 40px;
+  margin: 10px 0;
 }
 
-#player-name {
-  font-size: 0.9rem;
-  color: #4a9d5b;
-  cursor: pointer;
-  margin: 0 5px;
-}
-
-#player-name:hover {
-  text-decoration: underline;
-}
 
 #meta-board {
   display: grid;
@@ -168,15 +159,9 @@ body {
   pointer-events: none;
 }
 
-#level {
-  font-size: 0.9rem;
-  color: #666;
-  margin: 0 5px;
-}
 
-#undo, #continue-btn, #hint {
-  width: calc((100% - 10px) / 3);
-  padding: 6px 0;
+#level, #player-name, #undo, #continue-btn, #hint {
+  padding: 6px 20px;
   font-size: 0.9rem;
   border: none;
   border-radius: 6px;
@@ -186,8 +171,13 @@ body {
   transition: background 0.15s;
 }
 
-#undo:hover, #continue-btn:hover, #hint:hover {
+#level:hover, #player-name:hover, #undo:hover, #continue-btn:hover, #hint:hover {
   background: #3d8a4d;
+}
+
+#undo, #continue-btn, #hint {
+  width: calc((100% - 10px) / 3);
+  padding: 6px 0;
 }
 
 #continue-btn {
