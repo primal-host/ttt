@@ -8,6 +8,8 @@ let state = null;
 let busy = false;
 let gameRecorded = false;
 let currentPlayer = null;
+let stateHistory = [];
+let undoUsed = false;
 
 // --- Player storage ---
 // ttt_players = { "name": { level, history, game, recorded } }
@@ -51,6 +53,8 @@ function syncToPlayer() {
   history = data.history || [];
   state = data.game;
   gameRecorded = data.recorded || false;
+  undoUsed = data.undoUsed || false;
+  stateHistory = [];
 }
 
 function syncFromPlayer() {
@@ -60,6 +64,7 @@ function syncFromPlayer() {
     history,
     game: state,
     recorded: gameRecorded,
+    undoUsed,
   });
 }
 
@@ -74,6 +79,7 @@ let prevBoardWinners = null;
 const gameView = document.getElementById("game-view");
 const playersView = document.getElementById("players-view");
 const metaBoard = document.getElementById("meta-board");
+const undoBtn = document.getElementById("undo");
 const newGameBtn = document.getElementById("new-game");
 const moreGameBtn = document.getElementById("more-game");
 const levelEl = document.getElementById("level");
@@ -91,6 +97,10 @@ function updatePlayerNameDisplay() {
 }
 
 function recordResult(winner) {
+  if (undoUsed) {
+    syncFromPlayer();
+    return;
+  }
   history.push(winner);
   if (history.length > 2) history = history.slice(-2);
 
@@ -220,6 +230,7 @@ function render() {
   prevBoardWinners = [...state.board_winners];
 
   const gameOver = state.status === "bluewins" || state.status === "redwins" || state.status === "draw";
+  undoBtn.classList.toggle("btn-hidden", gameOver || stateHistory.length === 0);
   newGameBtn.classList.toggle("btn-hidden", !gameOver);
   moreGameBtn.classList.toggle("btn-hidden", !gameOver);
   if (gameOver && !gameRecorded) {
@@ -238,6 +249,7 @@ async function onCellClick(e) {
   const legal = getLegalMoves(state);
   if (!legal.some(([lb, lc]) => lb === b && lc === c)) return;
 
+  stateHistory.push(JSON.parse(JSON.stringify(state)));
   busy = true;
   try {
     const resp = await fetch("/api/move", {
@@ -256,9 +268,20 @@ async function onCellClick(e) {
   }
 }
 
+function undo() {
+  if (busy || stateHistory.length === 0) return;
+  state = stateHistory.pop();
+  undoUsed = true;
+  prevBoardWinners = null;
+  syncFromPlayer();
+  render();
+}
+
 async function newGame() {
   gameRecorded = false;
   prevBoardWinners = null;
+  stateHistory = [];
+  undoUsed = false;
 
   busy = true;
   try {
@@ -299,7 +322,8 @@ function moreGame() {
 
   gameRecorded = false;
   prevBoardWinners = null;
-
+  stateHistory = [];
+  undoUsed = false;
 
   syncFromPlayer();
   render();
@@ -372,6 +396,7 @@ function promptNewPlayer() {
 
 // --- Init ---
 playerNameEl.addEventListener("click", showPlayersView);
+undoBtn.addEventListener("click", undo);
 newGameBtn.addEventListener("click", newGame);
 moreGameBtn.addEventListener("click", moreGame);
 newPlayerBtn.addEventListener("click", promptNewPlayer);
