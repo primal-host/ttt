@@ -32,12 +32,12 @@ function clearGameState() {
 
 function recordResult(winner) {
   history.push(winner);
-  if (history.length > 3) history = history.slice(-3);
+  if (history.length > 2) history = history.slice(-2);
 
-  if (history.length === 3 && history.every(r => r === "blue")) {
+  if (history.length === 2 && history.every(r => r === "blue")) {
     level++;
     history = [];
-  } else if (history.length === 3 && history.every(r => r === "red")) {
+  } else if (history.length === 2 && history.every(r => r === "red")) {
     if (level > 0) level--;
     history = [];
   }
