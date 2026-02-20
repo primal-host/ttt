@@ -150,7 +150,18 @@ fn computer_move(state: &mut GameState, level: u32) {
         return;
     }
 
-    let chosen = if level >= 1 {
+    let chosen = if level == 0 {
+        // Level 0: avoid winning if possible (newbie-friendly)
+        let non_winning: Vec<_> = moves.iter()
+            .filter(|&&(b, c)| !would_win_board(&state.cells[b], c, Cell::Red))
+            .copied()
+            .collect();
+        if !non_winning.is_empty() {
+            *non_winning.choose(&mut rand::thread_rng()).unwrap()
+        } else {
+            *moves.choose(&mut rand::thread_rng()).unwrap()
+        }
+    } else if level >= 2 {
         // Play a move that wins a small board if available
         let winning: Vec<_> = moves.iter()
             .filter(|&&(b, c)| would_win_board(&state.cells[b], c, Cell::Red))
@@ -158,7 +169,7 @@ fn computer_move(state: &mut GameState, level: u32) {
             .collect();
         if !winning.is_empty() {
             *winning.choose(&mut rand::thread_rng()).unwrap()
-        } else if level >= 2 {
+        } else if level >= 3 {
             // Block opponent from winning a small board
             let blocking: Vec<_> = moves.iter()
                 .filter(|&&(b, c)| would_win_board(&state.cells[b], c, Cell::Blue))
@@ -166,7 +177,7 @@ fn computer_move(state: &mut GameState, level: u32) {
                 .collect();
             if !blocking.is_empty() {
                 *blocking.choose(&mut rand::thread_rng()).unwrap()
-            } else if level >= 3 {
+            } else if level >= 4 {
                 // Send opponent to an empty board (no pieces yet)
                 let to_empty: Vec<_> = moves.iter()
                     .filter(|&&(_b, c)| state.cells[c].iter().all(|&cell| cell == Cell::Empty))
@@ -174,7 +185,7 @@ fn computer_move(state: &mut GameState, level: u32) {
                     .collect();
                 if !to_empty.is_empty() {
                     *to_empty.choose(&mut rand::thread_rng()).unwrap()
-                } else if level >= 4 {
+                } else if level >= 5 {
                     // Send opponent to the board with the most empty cells
                     let empty_count = |c: usize| state.cells[c].iter().filter(|&&cell| cell == Cell::Empty).count();
                     let max_empty = moves.iter().map(|&(_, c)| empty_count(c)).max().unwrap();
@@ -183,11 +194,10 @@ fn computer_move(state: &mut GameState, level: u32) {
                         .copied()
                         .collect();
                     *most_empty.choose(&mut rand::thread_rng()).unwrap()
-                } else if level >= 5 {
+                } else if level >= 6 {
                     // Avoid sending opponent where they can win a board in one move
                     let safe: Vec<_> = moves.iter()
                         .filter(|&&(_, c)| {
-                            // Check if blue has any winning move on board c
                             !state.cells[c].iter().enumerate().any(|(i, &cell)| {
                                 cell == Cell::Empty && would_win_board(&state.cells[c], i, Cell::Blue)
                             })
@@ -195,7 +205,7 @@ fn computer_move(state: &mut GameState, level: u32) {
                         .copied()
                         .collect();
                     if !safe.is_empty() {
-                        if level >= 6 {
+                        if level >= 7 {
                             // Send opponent to a board where their only move sends us somewhere we can win
                             let trap: Vec<_> = safe.iter()
                                 .filter(|&&(_, c)| {
@@ -233,6 +243,7 @@ fn computer_move(state: &mut GameState, level: u32) {
             *moves.choose(&mut rand::thread_rng()).unwrap()
         }
     } else {
+        // Level 1: pure random
         *moves.choose(&mut rand::thread_rng()).unwrap()
     };
 
