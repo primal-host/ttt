@@ -158,6 +158,17 @@ fn computer_move(state: &mut GameState, level: u32) {
             .collect();
         if !winning.is_empty() {
             *winning.choose(&mut rand::thread_rng()).unwrap()
+        } else if level >= 2 {
+            // Block opponent from winning a small board
+            let blocking: Vec<_> = moves.iter()
+                .filter(|&&(b, c)| would_win_board(&state.cells[b], c, Cell::Blue))
+                .copied()
+                .collect();
+            if !blocking.is_empty() {
+                *blocking.choose(&mut rand::thread_rng()).unwrap()
+            } else {
+                *moves.choose(&mut rand::thread_rng()).unwrap()
+            }
         } else {
             *moves.choose(&mut rand::thread_rng()).unwrap()
         }
