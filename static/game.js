@@ -311,8 +311,10 @@ function moreGame() {
 
   // Winning boards
   if (metaWinLine) for (const b of metaWinLine) clearSet.add(b);
-  // Full boards
-  for (let b = 0; b < 9; b++) if (state.board_full[b]) clearSet.add(b);
+  // Full boards and boards with any 3-in-a-row
+  for (let b = 0; b < 9; b++) {
+    if (state.board_full[b] || findWinLine(state.cells[b])) clearSet.add(b);
+  }
   // Center board
   clearSet.add(4);
 
