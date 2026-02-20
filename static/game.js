@@ -372,15 +372,18 @@ function clearPlayerBoard(name) {
   data.assisted = false;
   data.stateHistory = [];
   savePlayerData(name, data);
-  if (currentPlayer === name) {
-    state = null;
-    gameRecorded = false;
-    assisted = false;
-    stateHistory = [];
-    hintMove = null;
-    hintText = "";
-  }
-  renderPlayersList();
+  currentPlayer = name;
+  saveCurrentPlayerName(name);
+  state = null;
+  gameRecorded = false;
+  assisted = false;
+  stateHistory = [];
+  hintMove = null;
+  hintText = "";
+  updatePlayerNameDisplay();
+  updateLevelDisplay();
+  showGameView();
+  newGame();
 }
 
 // --- Views ---
