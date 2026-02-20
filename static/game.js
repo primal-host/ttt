@@ -79,8 +79,16 @@ const levelEl = document.getElementById("level");
 const playerNameEl = document.getElementById("player-name");
 const infoImg = document.getElementById("info-img");
 
+const IMAGE_SOURCES = [
+  "https://picsum.photos/300/250",
+  "https://picsum.dev/300/250",
+  "https://loremflickr.com/300/250",
+];
+
 function refreshImage() {
-  if (infoImg) infoImg.src = "https://picsum.photos/300/250?r=" + Math.random();
+  if (!infoImg) return;
+  const source = IMAGE_SOURCES[Math.floor(Math.random() * IMAGE_SOURCES.length)];
+  infoImg.src = source + "?r=" + Math.random();
 }
 const playersList = document.getElementById("players-list");
 const newPlayerBtn = document.getElementById("new-player-btn");
