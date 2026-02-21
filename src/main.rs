@@ -1,32 +1,8 @@
-use axum::{
-    extract::Query,
-    http::header,
-    response::{Html, IntoResponse, Redirect},
-    routing::get,
-    Router,
-};
-use std::collections::HashMap;
-use std::time::{SystemTime, UNIX_EPOCH};
+use axum::{routing::get, Router};
 use tower_http::services::ServeDir;
 
-fn now_secs() -> u64 {
-    SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs()
-}
-
-async fn handle_index(Query(params): Query<HashMap<String, String>>) -> impl IntoResponse {
-    match params.get("v") {
-        Some(v) if v.parse::<u64>().is_ok() => {
-            let html = include_str!("../static/index.html").replace("{{VERSION}}", v);
-            (
-                [(header::CACHE_CONTROL, "no-store")],
-                Html(html),
-            ).into_response()
-        }
-        _ => {
-            let url = format!("/?v={}", now_secs());
-            Redirect::to(&url).into_response()
-        }
-    }
+async fn handle_index() -> axum::response::Html<&'static str> {
+    axum::response::Html(include_str!("../static/index.html"))
 }
 
 #[tokio::main]
