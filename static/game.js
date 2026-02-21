@@ -1,3 +1,6 @@
+import init, { wasm_new_game, wasm_make_move, wasm_get_hint } from './pkg/ttt.js';
+await init();
+
 const WIN_LINES = [
   [0,1,2],[3,4,5],[6,7,8],
   [0,3,6],[1,4,7],[2,5,8],
@@ -5,7 +8,6 @@ const WIN_LINES = [
 ];
 
 let state = null;
-let busy = false;
 let gameRecorded = false;
 let currentPlayer = null;
 let stateHistory = [];
@@ -258,8 +260,8 @@ function render() {
   }
 }
 
-async function onCellClick(e) {
-  if (busy || !state || state.status !== "bluetomove") return;
+function onCellClick(e) {
+  if (!state || state.status !== "bluetomove") return;
   const b = parseInt(e.target.dataset.board);
   const c = parseInt(e.target.dataset.cell);
 
@@ -269,46 +271,26 @@ async function onCellClick(e) {
   hintMove = null;
   hintText = "";
   stateHistory.push(JSON.parse(JSON.stringify(state)));
-  busy = true;
-  try {
-    const resp = await fetch("/api/move", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ state, board_idx: b, cell_idx: c, level }),
-    });
-    const data = await resp.json();
-    if (data.ok) {
-      state = data.state;
-      render();
-      syncFromPlayer();
-    }
-  } finally {
-    busy = false;
+  const result = wasm_make_move(state, b, c, level);
+  if (result.ok) {
+    state = result.state;
+    render();
+    syncFromPlayer();
   }
 }
 
-async function hint() {
-  if (busy || !state || state.status !== "bluetomove") return;
+function hint() {
+  if (!state || state.status !== "bluetomove") return;
   assisted = true;
   syncFromPlayer();
-  busy = true;
-  try {
-    const resp = await fetch("/api/hint", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ state }),
-    });
-    const data = await resp.json();
-    hintMove = { board: data.board_idx, cell: data.cell_idx };
-    hintText = data.explanation;
-    render();
-  } finally {
-    busy = false;
-  }
+  const data = wasm_get_hint(state);
+  hintMove = { board: data.board_idx, cell: data.cell_idx };
+  hintText = data.explanation;
+  render();
 }
 
 function undo() {
-  if (busy || stateHistory.length === 0) return;
+  if (stateHistory.length === 0) return;
   state = stateHistory.pop();
   assisted = true;
   hintMove = null;
@@ -318,7 +300,7 @@ function undo() {
   render();
 }
 
-async function newGame() {
+function newGame() {
   gameRecorded = false;
   prevBoardWinners = null;
   stateHistory = [];
@@ -326,16 +308,10 @@ async function newGame() {
   hintMove = null;
   hintText = "";
 
-  busy = true;
-  try {
-    const resp = await fetch("/api/new", { method: "POST" });
-    state = await resp.json();
-    syncFromPlayer();
-    updateLevelDisplay();
-    render();
-  } finally {
-    busy = false;
-  }
+  state = wasm_new_game();
+  syncFromPlayer();
+  updateLevelDisplay();
+  render();
 }
 
 function moreGame() {
