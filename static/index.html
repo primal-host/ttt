@@ -43,6 +43,9 @@
       </div>
     </div>
   </div>
-  <script src="/game.js?v={{VERSION}}"></script>
+  <script>
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
+  </script>
+  <script type="module" src="/game.js?v={{VERSION}}"></script>
 </body>
 </html>
